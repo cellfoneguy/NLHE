@@ -71,19 +71,20 @@ def findFlush(pool):
 	return False
 
 def findStraight(pool):
-	if("As" in pool):
-		pool.append("1s")
-	elif("Ah" in pool):
-		pool.append("1h")
-	elif("Ad" in pool):
-		pool.append("1d")
-	elif("Ac" in pool):
-		pool.append("1c")
+	poole = pool
+	if("As" in poole):
+		poole.append("1s")
+	elif("Ah" in poole):
+		poole.append("1h")
+	elif("Ad" in poole):
+		poole.append("1d")
+	elif("Ac" in poole):
+		poole.append("1c")
 
 	out = []
-	current = values[pool[0][0]]
-	out.append(pool[0])
-	for card in pool:
+	current = values[poole[0][0]]
+	out.append(poole[0])
+	for card in poole:
 		value = values[card[0]]
 		if(value == current):
 			continue
@@ -105,7 +106,6 @@ def findStraight(pool):
 def findCounts(pool):
 	counts = {}
 	for card in pool:
-		print(card)
 		if(card[0] in counts):
 			counts[card[0]].append(card)
 		else:
@@ -117,19 +117,20 @@ def findQuads(pool, counts):
 		if(len(counts[key]) == 4):
 			quads = [card for card in pool if card[0] == key]
 			removed = [card for card in pool if card[0] != key]
-			return quads + [removed[0]]
+			return quads + removed[:1]
 		else:
 			return False
 
 def findFullHouse(pool, counts):
 	#assumes counts is sorted
-	triple = {}
-	double = {}
+	triple = []
+	double = []
+	removed = []
 	for key in counts:
 		if(len(counts[key]) == 3):
 			triple = [card for card in pool if card[0] == key]
 			removed = [card for card in pool if card[0] != key]
-	if(triple is {}):
+	if(triple is []):
 		return False
 	counts = findCounts(removed)
 	for key in counts:
@@ -138,32 +139,86 @@ def findFullHouse(pool, counts):
 			return triple + double
 	return False
 
+def findTrips(pool, counts):
+	for key in counts:
+		if(len(counts[key]) == 3):
+			trips = [card for card in pool if card[0] == key]
+			removed = [card for card in pool if card[0] != key]
+			return trips + removed[:2]
+		else:
+			return False
+
+def findTwoPair(pool, counts):
+	pairhi = []
+	pairlo = []
+	removed = []
+	for key in counts:
+		if(len(counts[key]) == 2):
+			pairhi = [card for card in pool if card[0] == key]
+			removed = [card for card in pool if card[0] != key]
+	if(pairhi is []):
+		return False
+	counts = findCounts(removed)
+	for key in counts:
+		if(len(counts[key]) == 2):
+			pairlo = [card for card in pool if card[0] == key]
+			removed = [card for card in removed if card[0] != key]
+			return pairhi + pairlo + removed[:1]
+	return False
+
+def findPair(pool, counts):
+	pair = []
+	for key in counts: 
+		if(len(counts[key]) == 2):
+			pair = [card for card in pool if card[0] == key]
+			removed = [card for card in pool if card[0] != key]
+			return pair + removed[:3]
+	return False
 
 def evalHand(pool):
-	flush = findFlush(pool)
+	#finds all hands first. inefficient but prettier.
+	#separates finding different hands. also inefficient but prettier.
 	counts = findCounts(pool)
+	flush = findFlush(pool)
+	if(flush):
+		straightFlush = findStraight(flush[1])
+	quads = findQuads(pool, counts)
+	fullHouse = findFullHouse(pool, counts)
+	straight = findStraight(pool)
+	trips = findTrips(pool, counts)
+	twoPair = findTwoPair(pool, counts)
+	pair = findPair(pool, counts)
+
 	if(flush):
 		#at least a flush on table
-		straightFlush = findStraight(flush[1])
 		if(straightFlush):
 			#wtf straight flush
 			return ("straightFlush", straightFlush[:5])
-		else:
+		elif(quads):
 			#check quads next
-			quads = findQuads(pool, counts)
-			if(quads):
-				return ("quads", quads)
-			else:
-				#no quads, check fullHouse
-
-				#regular flush
-				return ("flush", flush[:5])
+			return ("quads", quads)
+		elif(fullHouse):
+			#no quads, check fullHouse
+			return ("fullHouse", fullHouse)
+		else:
+			#regular flush
+			return ("flush", flush[:5])
 	else:
 		#no flush
-		straight = findStraight(pool)
 		if(straight):
 			return ("straight", straight[:5])
-
+		elif(trips):
+			#check for trips
+			return ("trips", trips)
+		elif(twoPair):
+			#check for two pair
+			return ("twoPair", twoPair)
+		elif(pair):
+			#at least a pair?
+			return ("pair", pair)
+		else:
+			#no hand at all
+			return ("high", pool[:5])
 # def showdown(pool):
 
 
@@ -174,33 +229,25 @@ def update(table):
 		player.pool = sortCards(player.pool)
 		player.hand = evalHand(player.pool)
 
-pool = ["Ah", "Ad", "Ac", "Ks", "Kc", "Qc", "Jh"]
-counts = findCounts(pool)
-print(counts)
-print()
-print(findFullHouse(pool, counts))
 
 
+wsop = classes.Table()
+p1 = classes.Player()
+p2 = classes.Player()
+wsop.players["hero"] = p1
+wsop.players["villian"] = p2
 
-# wsop = classes.Table()
-# p1 = classes.Player()
-# p2 = classes.Player()
-# wsop.players["hero"] = p1
-# wsop.players["villian"] = p2
+noHand = True
+while(noHand):
+	wsop.reset()
+	dealTable(wsop)
+	dealTable(wsop)
+	dealTable(wsop)
+	dealTable(wsop)
 
-# noHand = True
-# while(noHand):
-# 	wsop.reset()
-# 	dealTable(wsop)
-# 	dealTable(wsop)
-# 	dealTable(wsop)
-# 	dealTable(wsop)
+	print(wsop.players)
+	print(wsop.board)
 
-# 	print(wsop.players)
-# 	print(wsop.board)
-
-# 	print(wsop.players["hero"].pool)
-# 	print(wsop.players["hero"].hand)
-# 	if(wsop.players["hero"].hand is not None):
-# 		noHand = False
-# 	input()
+	print(wsop.players["hero"].pool)
+	print(wsop.players["hero"].hand)
+	input()
