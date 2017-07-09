@@ -67,7 +67,8 @@ def findFlush(pool):
 			c.append(card)
 	for key in segregated:
 		if(len(segregated[key]) >= 5):
-			return (key, segregated[key])
+			return segregated[key]
+			#return (key, segregated[key])
 	return False
 
 def findStraight(pool):
@@ -181,7 +182,7 @@ def evalHand(pool):
 	counts = findCounts(pool)
 	flush = findFlush(pool)
 	if(flush):
-		straightFlush = findStraight(flush[1])
+		straightFlush = findStraight(flush)
 	quads = findQuads(pool, counts)
 	fullHouse = findFullHouse(pool, counts)
 	straight = findStraight(pool)
@@ -219,7 +220,21 @@ def evalHand(pool):
 		else:
 			#no hand at all
 			return ("high", pool[:5])
-# def showdown(pool):
+
+def showdown(p1, p2):
+	#returns winning player
+	p1HandRank = handRanks[p1.hand.keys()[0]]
+	p2HandRank = handRanks[p2.hand.keys()]
+	p1Hand = p1.hand.values()[0]
+	p2Hand = p2.hand.values()[0]
+
+	if(p1HandRank > p2HandRank):
+		return p1
+	elif(p1HandRank < p2HandRank):
+		return p2
+	else:
+		quit()
+
 
 
 def update(table):
@@ -237,8 +252,8 @@ p2 = classes.Player()
 wsop.players["hero"] = p1
 wsop.players["villian"] = p2
 
-noHand = True
-while(noHand):
+go = True
+while(go):
 	wsop.reset()
 	dealTable(wsop)
 	dealTable(wsop)
@@ -250,4 +265,6 @@ while(noHand):
 
 	print(wsop.players["hero"].pool)
 	print(wsop.players["hero"].hand)
-	input()
+	userInput = input("continue? y/n\n")
+	if(userInput != "y"):
+		go = False
