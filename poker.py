@@ -68,7 +68,7 @@ def findFlush(pool):
 	for key in segregated:
 		if(len(segregated[key]) >= 5):
 			return (key, segregated[key])
-	return None
+	return False
 
 def findStraight(pool):
 	if("As" in pool):
@@ -100,23 +100,68 @@ def findStraight(pool):
 	if(len(out) >= 5):
 		return out
 	else:
-		return None
+		return False
+
+def findCounts(pool):
+	counts = {}
+	for card in pool:
+		print(card)
+		if(card[0] in counts):
+			counts[card[0]].append(card)
+		else:
+			counts[card[0]] = [card]
+	return counts
+
+def findQuads(pool, counts):
+	for key in counts:
+		if(len(counts[key]) == 4):
+			quads = [card for card in pool if card[0] == key]
+			removed = [card for card in pool if card[0] != key]
+			return quads + [removed[0]]
+		else:
+			return False
+
+def findFullHouse(pool, counts):
+	#assumes counts is sorted
+	triple = {}
+	double = {}
+	for key in counts:
+		if(len(counts[key]) == 3):
+			triple = [card for card in pool if card[0] == key]
+			removed = [card for card in pool if card[0] != key]
+	if(triple is {}):
+		return False
+	counts = findCounts(removed)
+	for key in counts:
+		if(len(counts[key]) >= 2):
+			double = [card for card in pool if card[0] == key]
+			return triple + double
+	return False
 
 
 def evalHand(pool):
 	flush = findFlush(pool)
-	if(flush is not None):
+	counts = findCounts(pool)
+	if(flush):
+		#at least a flush on table
 		straightFlush = findStraight(flush[1])
-		if(straightFlush is not None):
+		if(straightFlush):
 			#wtf straight flush
 			return ("straightFlush", straightFlush[:5])
 		else:
-			#regular flush
-			return ("flush", flush[:5])
+			#check quads next
+			quads = findQuads(pool, counts)
+			if(quads):
+				return ("quads", quads)
+			else:
+				#no quads, check fullHouse
+
+				#regular flush
+				return ("flush", flush[:5])
 	else:
 		#no flush
 		straight = findStraight(pool)
-		if(straight is not None):
+		if(straight):
 			return ("straight", straight[:5])
 
 # def showdown(pool):
@@ -129,27 +174,33 @@ def update(table):
 		player.pool = sortCards(player.pool)
 		player.hand = evalHand(player.pool)
 
+pool = ["Ah", "Ad", "Ac", "Ks", "Kc", "Qc", "Jh"]
+counts = findCounts(pool)
+print(counts)
+print()
+print(findFullHouse(pool, counts))
 
 
-wsop = classes.Table()
-p1 = classes.Player()
-p2 = classes.Player()
-wsop.players["hero"] = p1
-wsop.players["villian"] = p2
 
-noHand = True
-while(noHand):
-	wsop.reset()
-	dealTable(wsop)
-	dealTable(wsop)
-	dealTable(wsop)
-	dealTable(wsop)
+# wsop = classes.Table()
+# p1 = classes.Player()
+# p2 = classes.Player()
+# wsop.players["hero"] = p1
+# wsop.players["villian"] = p2
 
-	print(wsop.players)
-	print(wsop.board)
+# noHand = True
+# while(noHand):
+# 	wsop.reset()
+# 	dealTable(wsop)
+# 	dealTable(wsop)
+# 	dealTable(wsop)
+# 	dealTable(wsop)
 
-	print(wsop.players["hero"].pool)
-	print(wsop.players["hero"].hand)
-	if(wsop.players["hero"].hand is not None):
-		noHand = False
-	input()
+# 	print(wsop.players)
+# 	print(wsop.board)
+
+# 	print(wsop.players["hero"].pool)
+# 	print(wsop.players["hero"].hand)
+# 	if(wsop.players["hero"].hand is not None):
+# 		noHand = False
+# 	input()
