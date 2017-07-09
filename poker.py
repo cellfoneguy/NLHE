@@ -49,7 +49,6 @@ def sortCards(pool):
 	return out
 
 
-
 def findFlush(pool):
 	s, h, d, c = [], [], [], []
 	segregated = {"s":s, "h":h, "d":d, "c":c}
@@ -104,10 +103,18 @@ def findStraight(pool):
 def evalHand(pool):
 	flush = findFlush(pool)
 	if(flush is not None):
-		straightFlush = findStraight(flush)
+		straightFlush = findStraight(flush[1])
 		if(straightFlush is not None):
-		#check for straight flush
-			quit()
+			#wtf straight flush
+			return ("straightFlush", straightFlush[:5])
+		else:
+			#regular flush
+			return ("flush", flush[:5])
+	else:
+		#no flush
+		straight = findStraight(pool)
+		if(straight is not None):
+			return ("straight", straight[:5])
 
 
 
@@ -118,20 +125,27 @@ def update(table):
 		player.pool = sortCards(player.pool)
 		player.hand = evalHand(player.pool)
 
+
+
 wsop = classes.Table()
 p1 = classes.Player()
 p2 = classes.Player()
 wsop.players["hero"] = p1
 wsop.players["villian"] = p2
 
+noHand = True
+while(noHand):
+	wsop.reset()
+	dealTable(wsop)
+	dealTable(wsop)
+	dealTable(wsop)
+	dealTable(wsop)
 
-# dealTable(wsop)
-# dealTable(wsop)
-# dealTable(wsop)
-# dealTable(wsop)
+	print(wsop.players)
+	print(wsop.board)
 
-# print(wsop.players)
-# print(wsop.board)
-
-# print(wsop.players["hero"].pool)
-# print(wsop.players["hero"].hand)
+	print(wsop.players["hero"].pool)
+	print(wsop.players["hero"].hand)
+	if(wsop.players["hero"].hand is not None):
+		noHand = False
+	input()
