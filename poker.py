@@ -8,6 +8,9 @@ import string
 values = {'1':1, '2':2, '3':3, '4':4, '5':5, '6':6, '7':7, '8':8, '9':9,\
 	'T':10, 'J':11, 'Q':12, 'K':13, 'A':14}
 
+handRanks = {"high": 1, "pair":2, "twoPair":3, "trips":4, "straight":5,\
+	"flush":6, "fullHouse":7, "quads":8, "straightFlush": 9}
+
 def dealCard(table):
 	#pops a random card from the remaining deck.
 	out = random.choice(table.deck)
@@ -116,6 +119,7 @@ def evalHand(pool):
 		if(straight is not None):
 			return ("straight", straight[:5])
 
+# def showdown(pool):
 
 
 def update(table):
