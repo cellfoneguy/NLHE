@@ -233,7 +233,7 @@ def showdown(p1, p2):
 	elif(p1HandRank < p2HandRank):
 		return p2
 	else:
-		quit()
+		pass
 
 
 
