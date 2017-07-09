@@ -69,8 +69,15 @@ def findFlush(pool):
 	return None
 
 def findStraight(pool):
-	if("As" in pool or "Ah" in pool or "Ad" in pool or "Ac" in pool):
-		pool.append("1x")
+	if("As" in pool):
+		pool.append("1s")
+	elif("Ah" in pool):
+		pool.append("1h")
+	elif("Ad" in pool):
+		pool.append("1d")
+	elif("Ac" in pool):
+		pool.append("1c")
+
 	out = []
 	current = values[pool[0][0]]
 	out.append(pool[0])
@@ -79,15 +86,28 @@ def findStraight(pool):
 		if(value == current):
 			continue
 		elif(value == (current - 1)):
+			current = value
 			out.append(card)
-		elif()
+		else:
+			if(len(out) >= 5):
+				return out
+			else:
+				out = [card]
+				current = value
+
+	if(len(out) >= 5):
+		return out
+	else:
+		return None
 
 
 def evalHand(pool):
 	flush = findFlush(pool)
 	if(flush is not None):
+		straightFlush = findStraight(flush)
+		if(straightFlush is not None):
 		#check for straight flush
-		quit()
+			quit()
 
 
 
@@ -105,13 +125,13 @@ wsop.players["hero"] = p1
 wsop.players["villian"] = p2
 
 
-dealTable(wsop)
-dealTable(wsop)
-dealTable(wsop)
-dealTable(wsop)
+# dealTable(wsop)
+# dealTable(wsop)
+# dealTable(wsop)
+# dealTable(wsop)
 
-print(wsop.players)
-print(wsop.board)
+# print(wsop.players)
+# print(wsop.board)
 
-print(wsop.players["hero"].pool)
-print(wsop.players["hero"].hand)
+# print(wsop.players["hero"].pool)
+# print(wsop.players["hero"].hand)
