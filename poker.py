@@ -164,7 +164,8 @@ def findTwoPair(pool, counts):
 		if(len(counts[key]) == 2):
 			pairlo = [card for card in pool if card[0] == key]
 			removed = [card for card in removed if card[0] != key]
-			return pairhi + pairlo + removed[:1]
+			print(pairhi + pairlo)
+			return sortCards(pairhi + pairlo) + removed[:1]
 	return False
 
 def findPair(pool, counts):
@@ -183,6 +184,8 @@ def evalHand(pool):
 	flush = findFlush(pool)
 	if(flush):
 		straightFlush = findStraight(flush)
+	else:
+		straightFlush = False
 	quads = findQuads(pool, counts)
 	fullHouse = findFullHouse(pool, counts)
 	straight = findStraight(pool)
@@ -190,36 +193,33 @@ def evalHand(pool):
 	twoPair = findTwoPair(pool, counts)
 	pair = findPair(pool, counts)
 
-	if(flush):
-		#at least a flush on table
-		if(straightFlush):
-			#wtf straight flush
-			return ("straightFlush", straightFlush[:5])
-		elif(quads):
-			#check quads next
-			return ("quads", quads)
-		elif(fullHouse):
-			#no quads, check fullHouse
-			return ("fullHouse", fullHouse)
-		else:
-			#regular flush
-			return ("flush", flush[:5])
+	if(straightFlush):
+		#wtf straight flush
+		return ("straightFlush", straightFlush[:5])
+	elif(quads):
+		#check quads next
+		return ("quads", quads)
+	elif(fullHouse):
+		#no quads, check fullHouse
+		return ("fullHouse", fullHouse)
+	elif(flush):
+		#regular flush
+		return ("flush", flush[:5])
+	elif(straight):
+		#no fullHouse and no flush
+		return ("straight", straight[:5])
+	elif(trips):
+		#check for trips
+		return ("trips", trips)
+	elif(twoPair):
+		#check for two pair
+		return ("twoPair", twoPair)
+	elif(pair):
+		#at least a pair?
+		return ("pair", pair)
 	else:
-		#no flush
-		if(straight):
-			return ("straight", straight[:5])
-		elif(trips):
-			#check for trips
-			return ("trips", trips)
-		elif(twoPair):
-			#check for two pair
-			return ("twoPair", twoPair)
-		elif(pair):
-			#at least a pair?
-			return ("pair", pair)
-		else:
-			#no hand at all
-			return ("high", pool[:5])
+		#no hand at all
+		return ("high", pool[:5])
 
 def showdown(p1, p2):
 	#returns winning player
@@ -273,8 +273,14 @@ while(go):
 	dealTable(wsop)
 	dealTable(wsop)
 
-	print(wsop.players)
-	print(wsop.board)
+	#debug
+	# p1.holeCards = ["Qd", "Qs"]
+	# p2.holeCards = ["Ad", "Td"]
+	# wsop.board = ["Qc", "3d", "6c", "3s", "2d"]
+	# update(wsop)
+
+	print("Players: {}".format(wsop.players))
+	print("Board: {}".format(wsop.board))
 
 	# print(wsop.players["hero"].pool)
 	print("Hero: {}".format(wsop.players[0].hand))
@@ -282,7 +288,10 @@ while(go):
 	
 	print()
 	winner = showdown(p1, p2)
-	print("Winner: {}".format(winner.hand))
+	if(winner):
+		print("Winner: {}".format(winner.hand))
+	else:
+		print("Chop")
 
 	userInput = input("continue? y/n\n")
 	if(userInput != "y"):

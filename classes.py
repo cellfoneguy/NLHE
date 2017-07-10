@@ -8,7 +8,7 @@ class Player():
 		self.stack = 100
 		self.holeCards = []
 		self.pool = []
-		self.hand = {}
+		self.hand = None
 
 	def __repr__(self):
 		return ("{}: {} {}".format(self.name, self.holeCards[0], \
@@ -19,7 +19,7 @@ class Player():
 		self.stack = 100
 		self.holeCards = []
 		self.pool = []
-		self.hand = {}
+		self.hand = None
 
 
 
