@@ -164,7 +164,6 @@ def findTwoPair(pool, counts):
 		if(len(counts[key]) == 2):
 			pairlo = [card for card in pool if card[0] == key]
 			removed = [card for card in removed if card[0] != key]
-			print(pairhi + pairlo)
 			return sortCards(pairhi + pairlo) + removed[:1]
 	return False
 
@@ -233,7 +232,7 @@ def showdown(p1, p2):
 	# elif(p1HandRank < p2HandRank):
 	# 	return p2
 	# else:
-	for index in range(len(p1Hand)):
+	for index in range(len(p1Hand) + 1):
 		p1Value = values[p1.hand[1][index][0]]
 		p2Value = values[p2.hand[1][index][0]]
 		if(p1Value > p2Value):
@@ -274,10 +273,10 @@ while(go):
 	dealTable(wsop)
 
 	#debug
-	# p1.holeCards = ["Qd", "Qs"]
-	# p2.holeCards = ["Ad", "Td"]
-	# wsop.board = ["Qc", "3d", "6c", "3s", "2d"]
-	# update(wsop)
+	p1.holeCards = ["2d", "3s"]
+	p2.holeCards = ["2d", "8d"]
+	wsop.board = ["Qc", "Ad", "Jc", "Ts", "7d"]
+	update(wsop)
 
 	print("Players: {}".format(wsop.players))
 	print("Board: {}".format(wsop.board))
