@@ -4,6 +4,7 @@
 import random
 import classes
 import string
+import wx
 
 #maps card number to its value
 values = {'1':1, '2':2, '3':3, '4':4, '5':5, '6':6, '7':7, '8':8, '9':9,\
@@ -259,7 +260,6 @@ def showdown(p1, p2):
 			else:
 				continue
 		return None
-		
 
 def update(table):
 	#adds new card to pools and sorts pools
@@ -268,6 +268,13 @@ def update(table):
 		player.pool = sortCards(player.pool)
 		player.hand = evalHand(player.pool)
 
+def graphics():
+	app = wx.App(False)
+	frame = classes.Poker(None, "Texas Hold'em")
+	frame.Show(True)
+	app.MainLoop()
+
+graphics()
 
 
 wsop = classes.Table()
@@ -278,7 +285,7 @@ p2.name = "Villain"
 wsop.players.append(p1)
 wsop.players.append(p2)
 
-
+"""
 go = True
 while(go):
 	wsop.reset()
@@ -299,7 +306,7 @@ while(go):
 	# print(wsop.players["hero"].pool)
 	print("Hero: {}".format(wsop.players[0].hand))
 	print("Villain: {}".format(wsop.players[1].hand))
-	
+
 	print()
 	winner = showdown(p1, p2)
 	if(winner):
@@ -310,3 +317,4 @@ while(go):
 	# userInput = input("continue? y/n\n")
 	# if(userInput != "y"):
 	# 	go = False
+"""
