@@ -232,9 +232,11 @@ def showdown(p1, p2):
 	# elif(p1HandRank < p2HandRank):
 	# 	return p2
 	# else:
-	for index in range(len(p1Hand) + 1):
-		p1Value = values[p1.hand[1][index][0]]
-		p2Value = values[p2.hand[1][index][0]]
+	for index in range(len(p1Hand[1])):
+		p1Card = p1.hand[1][index]
+		p2Card = p2.hand[1][index]
+		p1Value = values[p1Card[0]]
+		p2Value = values[p2Card[0]]
 		if(p1Value > p2Value):
 			return p1
 		elif(p1Value < p2Value):
@@ -243,9 +245,6 @@ def showdown(p1, p2):
 			continue
 	return None
 		
-
-
-
 
 def update(table):
 	#adds new card to pools and sorts pools
@@ -264,6 +263,7 @@ p2.name = "Villain"
 wsop.players.append(p1)
 wsop.players.append(p2)
 
+
 go = True
 while(go):
 	wsop.reset()
@@ -273,10 +273,10 @@ while(go):
 	dealTable(wsop)
 
 	#debug
-	p1.holeCards = ["2d", "3s"]
-	p2.holeCards = ["2d", "8d"]
-	wsop.board = ["Qc", "Ad", "Jc", "Ts", "7d"]
-	update(wsop)
+	# p1.holeCards = ["2d", "3s"]
+	# p2.holeCards = ["2d", "8d"]
+	# wsop.board = ["Qc", "Ad", "Jc", "Ts", "7d"]
+	# update(wsop)
 
 	print("Players: {}".format(wsop.players))
 	print("Board: {}".format(wsop.board))
@@ -292,6 +292,6 @@ while(go):
 	else:
 		print("Chop")
 
-	userInput = input("continue? y/n\n")
-	if(userInput != "y"):
-		go = False
+	# userInput = input("continue? y/n\n")
+	# if(userInput != "y"):
+	# 	go = False
