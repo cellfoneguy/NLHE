@@ -20,7 +20,7 @@ def dealCard(table):
 def dealTable(table):
 	#deals the cards for each stage and updates player cards pools
 	if(table.status is "ante"):
-		for player in table.players.values():
+		for player in table.players:
 			player.holeCards.append(dealCard(table))
 			player.holeCards.append(dealCard(table))
 		table.status = "pre"
@@ -223,23 +223,34 @@ def evalHand(pool):
 
 def showdown(p1, p2):
 	#returns winning player
-	p1HandRank = handRanks[p1.hand.keys()[0]]
-	p2HandRank = handRanks[p2.hand.keys()]
-	p1Hand = p1.hand.values()[0]
-	p2Hand = p2.hand.values()[0]
+	p1HandRank = handRanks[p1.hand[0]]
+	p2HandRank = handRanks[p2.hand[0]]
+	p1Hand = p1.hand[0]
+	p2Hand = p2.hand[0]
 
-	if(p1HandRank > p2HandRank):
-		return p1
-	elif(p1HandRank < p2HandRank):
-		return p2
-	else:
-		pass
+	# if(p1HandRank > p2HandRank):
+	# 	return p1
+	# elif(p1HandRank < p2HandRank):
+	# 	return p2
+	# else:
+	for index in range(len(p1Hand)):
+		p1Value = values[p1.hand[1][index][0]]
+		p2Value = values[p2.hand[1][index][0]]
+		if(p1Value > p2Value):
+			return p1
+		elif(p1Value < p2Value):
+			return p2
+		else:
+			continue
+	return None
+		
+
 
 
 
 def update(table):
 	#adds new card to pools and sorts pools
-	for player in table.players.values():
+	for player in table.players:
 		player.pool = player.holeCards + table.board
 		player.pool = sortCards(player.pool)
 		player.hand = evalHand(player.pool)
@@ -249,8 +260,10 @@ def update(table):
 wsop = classes.Table()
 p1 = classes.Player()
 p2 = classes.Player()
-wsop.players["hero"] = p1
-wsop.players["villian"] = p2
+p1.name = "Hero"
+p2.name = "Villain"
+wsop.players.append(p1)
+wsop.players.append(p2)
 
 go = True
 while(go):
@@ -263,8 +276,14 @@ while(go):
 	print(wsop.players)
 	print(wsop.board)
 
-	print(wsop.players["hero"].pool)
-	print(wsop.players["hero"].hand)
+	# print(wsop.players["hero"].pool)
+	print("Hero: {}".format(wsop.players[0].hand))
+	print("Villain: {}".format(wsop.players[1].hand))
+	
+	print()
+	winner = showdown(p1, p2)
+	print("Winner: {}".format(winner.hand))
+
 	userInput = input("continue? y/n\n")
 	if(userInput != "y"):
 		go = False
