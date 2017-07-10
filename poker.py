@@ -5,9 +5,11 @@ import random
 import classes
 import string
 
+#maps card number to its value
 values = {'1':1, '2':2, '3':3, '4':4, '5':5, '6':6, '7':7, '8':8, '9':9,\
 	'T':10, 'J':11, 'Q':12, 'K':13, 'A':14}
 
+#maps card rank
 handRanks = {"high": 1, "pair":2, "twoPair":3, "trips":4, "straight":5,\
 	"flush":6, "fullHouse":7, "quads":8, "straightFlush": 9}
 
@@ -35,7 +37,6 @@ def dealTable(table):
 	elif(table.status is "turn"):
 		table.board.append(dealCard(table))
 		table.status = "river"
-
 	update(table)
 
 def sortCards(pool):
@@ -53,6 +54,7 @@ def sortCards(pool):
 
 
 def findFlush(pool):
+	#returns a list of the flush cards, or False if none
 	s, h, d, c = [], [], [], []
 	segregated = {"s":s, "h":h, "d":d, "c":c}
 	for card in pool:
@@ -65,6 +67,7 @@ def findFlush(pool):
 			d.append(card)
 		else:
 			c.append(card)
+	#only need to check once, because only one flush is possible
 	for key in segregated:
 		if(len(segregated[key]) >= 5):
 			return segregated[key]
@@ -72,7 +75,9 @@ def findFlush(pool):
 	return False
 
 def findStraight(pool):
+	#returns a list of the straight cards, or False if none
 	poole = pool
+	#hacky way to implement Aces counting as 1 or 14
 	if("As" in poole):
 		poole.append("1s")
 	elif("Ah" in poole):
@@ -85,6 +90,7 @@ def findStraight(pool):
 	out = []
 	current = values[poole[0][0]]
 	out.append(poole[0])
+	#list is sorted, so check consecutive indexes for consecutive values
 	for card in poole:
 		value = values[card[0]]
 		if(value == current):
@@ -105,6 +111,8 @@ def findStraight(pool):
 		return False
 
 def findCounts(pool):
+	#finds the multiplicities of each card in the list
+	#returns as a dict {card letter: [card1, card2]}
 	counts = {}
 	for card in pool:
 		if(card[0] in counts):
@@ -114,6 +122,7 @@ def findCounts(pool):
 	return counts
 
 def findQuads(pool, counts):
+	#finds quads or False
 	for key in counts:
 		if(len(counts[key]) == 4):
 			quads = [card for card in pool if card[0] == key]
@@ -123,6 +132,7 @@ def findQuads(pool, counts):
 			return False
 
 def findFullHouse(pool, counts):
+	#finds fullHouse or False
 	#assumes counts is sorted
 	triple = []
 	double = []
@@ -141,6 +151,7 @@ def findFullHouse(pool, counts):
 	return False
 
 def findTrips(pool, counts):
+	#finds trips or False
 	for key in counts:
 		if(len(counts[key]) == 3):
 			trips = [card for card in pool if card[0] == key]
@@ -150,6 +161,7 @@ def findTrips(pool, counts):
 			return False
 
 def findTwoPair(pool, counts):
+	#finds twoPair or False
 	pairhi = []
 	pairlo = []
 	removed = []
@@ -164,10 +176,12 @@ def findTwoPair(pool, counts):
 		if(len(counts[key]) == 2):
 			pairlo = [card for card in pool if card[0] == key]
 			removed = [card for card in removed if card[0] != key]
+			#unordered dicts kept reversing the order of pairhi/pairlo
 			return sortCards(pairhi + pairlo) + removed[:1]
 	return False
 
 def findPair(pool, counts):
+	#finds pair or False
 	pair = []
 	for key in counts: 
 		if(len(counts[key]) == 2):
@@ -227,23 +241,24 @@ def showdown(p1, p2):
 	p1Hand = p1.hand[0]
 	p2Hand = p2.hand[0]
 
-	# if(p1HandRank > p2HandRank):
-	# 	return p1
-	# elif(p1HandRank < p2HandRank):
-	# 	return p2
-	# else:
-	for index in range(len(p1Hand[1])):
-		p1Card = p1.hand[1][index]
-		p2Card = p2.hand[1][index]
-		p1Value = values[p1Card[0]]
-		p2Value = values[p2Card[0]]
-		if(p1Value > p2Value):
-			return p1
-		elif(p1Value < p2Value):
-			return p2
-		else:
-			continue
-	return None
+	if(p1HandRank > p2HandRank):
+		return p1
+	elif(p1HandRank < p2HandRank):
+		return p2
+	else:
+		#hand ranks are the same, compare values or kickers
+		for index in range(len(p1Hand[1])):
+			p1Card = p1.hand[1][index]
+			p2Card = p2.hand[1][index]
+			p1Value = values[p1Card[0]]
+			p2Value = values[p2Card[0]]
+			if(p1Value > p2Value):
+				return p1
+			elif(p1Value < p2Value):
+				return p2
+			else:
+				continue
+		return None
 		
 
 def update(table):
