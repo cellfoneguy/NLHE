@@ -285,6 +285,8 @@ def loadImages(pics):
 	pics["As"] = pygame.image.load(os.path.join('Cards', 'As.png'))
 	pics["As"] = pygame.transform.smoothscale(pics["As"], (cW, cH))
 	pics["AsRect"] = pics["As"].get_rect()
+	pics["bg"] = pygame.image.load("graphics.png")
+	pics["bgRect"] = pics["bg"].get_rect()
 
 def graphics():
 	#set graphics variables
@@ -328,7 +330,7 @@ def graphics():
 		screen.fill(WHITE)
 
 		# --- Drawing code should go here
-		pygame.draw.line(screen, BLACK, [0, dividerH], [screenW, dividerH], 3)
+		screen.blit(pics["bg"], pics["bgRect"])
 		screen.blit(pics["As"], pics["AsRect"])
 
 		# --- Go ahead and update the screen with what we've drawn.
