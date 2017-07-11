@@ -265,7 +265,6 @@ def showdown(p1, p2):
 			p2Card = p2Hand[index]
 			p1Value = values[p1Card[0]]
 			p2Value = values[p2Card[0]]
-			print(p1Value, p2Value)
 			if(p1Value > p2Value):
 				return p1
 			elif(p1Value < p2Value):
@@ -315,6 +314,9 @@ def graphics(table):
 
 
 	pygame.init()
+	pygame.font.init()
+	myfont = pygame.font.SysFont('Arial', 40)
+	textsurface = myfont.render('Winner', False, BLACK)
 	screen = pygame.display.set_mode(size)
 	pygame.display.set_caption("Texas Hold'em")
 
@@ -348,6 +350,7 @@ def graphics(table):
 			winner = showdown(p1, p2)
 			if(winner):
 				print("Winner: {}".format(winner.hand))
+				table.winner = winner
 			else:
 				print("Chop")
 			table.status = "done"
@@ -373,12 +376,20 @@ def graphics(table):
 			loadCard(screen, pics, table.board[1], cW, cH, cPos["bf2"])
 			loadCard(screen, pics, table.board[2], cW, cH, cPos["bf3"])
 			loadCard(screen, pics, table.board[3], cW, cH, cPos["bt"])
-		elif(table.status == "river" or table.status == "done"):
+		elif(table.status == "river"):
 			loadCard(screen, pics, table.board[0], cW, cH, cPos["bf1"])
 			loadCard(screen, pics, table.board[1], cW, cH, cPos["bf2"])
 			loadCard(screen, pics, table.board[2], cW, cH, cPos["bf3"])
 			loadCard(screen, pics, table.board[3], cW, cH, cPos["bt"])
 			loadCard(screen, pics, table.board[4], cW, cH, cPos["br"])
+		elif(table.status == "done"):
+			loadCard(screen, pics, table.board[0], cW, cH, cPos["bf1"])
+			loadCard(screen, pics, table.board[1], cW, cH, cPos["bf2"])
+			loadCard(screen, pics, table.board[2], cW, cH, cPos["bf3"])
+			loadCard(screen, pics, table.board[3], cW, cH, cPos["bt"])
+			loadCard(screen, pics, table.board[4], cW, cH, cPos["br"])
+			if(table.winner):
+				screen.blit(textsurface,(100, 100))
 
 		# --- Go ahead and update the screen with what we've drawn.
 		pygame.display.flip()
