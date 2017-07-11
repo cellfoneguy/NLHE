@@ -47,6 +47,8 @@ def dealTable(table):
 	elif(table.status is "turn"):
 		table.board.append(dealCard(table))
 		table.status = "river"
+	elif(table.status is "river"):
+		pass
 	update(table)
 
 def sortCards(pool):
@@ -277,28 +279,38 @@ def update(table):
 		player.pool = sortCards(player.pool)
 		player.hand = evalHand(player.pool)
 
-def loadImages(pics):
-	#loads images from file, resizes them, get_rects them
-	cW = 56
-	cH = 76
+def loadCard(screen, pics, card, cW, cH, topLeft):
+	#loads a card and places it
+	pics[card] = pygame.image.load(os.path.join("Cards", "{}.png".format(card)))
+	pics[card] = pygame.transform.smoothscale(pics[card], (cW, cH))
+	pics["{}Rect".format(card)] = pics[card].get_rect(topleft = topLeft)
+	screen.blit(pics[card], pics["{}Rect".format(card)])
 
-	pics["As"] = pygame.image.load(os.path.join('Cards', 'As.png'))
-	pics["As"] = pygame.transform.smoothscale(pics["As"], (cW, cH))
-	pics["AsRect"] = pics["As"].get_rect()
+def loadBG(screen, pics, cW, cH):
+	#loads images from file, resizes them, get_rects them
 	pics["bg"] = pygame.image.load("graphics.png")
 	pics["bgRect"] = pics["bg"].get_rect()
+	screen.blit(pics["bg"], pics["bgRect"])
 
-def graphics():
+def graphics(table):
 	#set graphics variables
 	screenW = 800
 	screenH = 600
 	dividerH = 450
+	cW = 56
+	cH = 76
+	bTop = dividerH/2 - cH/2
+	bf1 = (bTop, 250)
+	bf2 = (bTop, 310)
+	bf3 = (bTop, 370)
+	bt = (bTop, 430)
+	br = (bTop, 490)
 
 	size = (screenW, screenH)
+	hcPos = {"bm1": ((screenW/2 - cW), 350), "bm2": ((screenW/2), 350)}
 	pics = {}
 
 
-	loadImages(pics)
 	pygame.init()
 	screen = pygame.display.set_mode(size)
 	pygame.display.set_caption("Texas Hold'em")
@@ -314,24 +326,39 @@ def graphics():
 		# --- Main event loop
 		for event in pygame.event.get(): # User did something
 			if event.type == pygame.QUIT:
-				print("User asked to quit.")
 				done = True
 			elif event.type == pygame.KEYDOWN:
-				print("User pressed a key.")
-			elif event.type == pygame.KEYUP:
-				print("User let go of a key.")
+				dealTable(table)
 			elif event.type == pygame.MOUSEBUTTONDOWN:
-				print("User pressed a mouse button")
+				table.reset()
 
 		# --- Game logic should go here
+		if(table.status == "river"):
+			print("Players: {}".format(wsop.players))
+			print("Board: {}".format(wsop.board))
+
+			# print(wsop.players["hero"].pool)
+			print("Hero: {}".format(wsop.players[0].hand))
+			print("Villain: {}".format(wsop.players[1].hand))
+
+			print()
+			winner = showdown(p1, p2)
+			if(winner):
+				print("Winner: {}".format(winner.hand))
+			else:
+				print("Chop")
+			table.status = "done"
 
 		# First, clear the screen to white. Don't put other drawing commands
 		# above this, or they will be erased with this command.
-		screen.fill(WHITE)
+		#screen.fill(WHITE)
 
 		# --- Drawing code should go here
-		screen.blit(pics["bg"], pics["bgRect"])
-		screen.blit(pics["As"], pics["AsRect"])
+		loadBG(screen, pics, cW, cH)
+		if(table.players[0].holeCards):
+			loadCard(screen, pics, table.players[0].holeCards[0], cW, cH, hcPos["bm1"])
+			loadCard(screen, pics, table.players[0].holeCards[1], cW, cH, hcPos["bm2"])
+		if(table.status == "flop")
 
 		# --- Go ahead and update the screen with what we've drawn.
 		pygame.display.flip()
@@ -340,10 +367,11 @@ def graphics():
 		clock.tick(60)
 	pygame.quit()
 
-graphics()
+
 
 
 wsop = classes.Table()
+
 p1 = classes.Player()
 p2 = classes.Player()
 p1.name = "Hero"
@@ -351,36 +379,22 @@ p2.name = "Villain"
 wsop.players.append(p1)
 wsop.players.append(p2)
 
-"""
-go = True
-while(go):
-	wsop.reset()
-	dealTable(wsop)
-	dealTable(wsop)
-	dealTable(wsop)
-	dealTable(wsop)
 
-	#debug
-	# p1.holeCards = ["2d", "3s"]
-	# p2.holeCards = ["2d", "8d"]
-	# wsop.board = ["Qc", "Ad", "Jc", "Ts", "7d"]
-	# update(wsop)
+wsop.reset()
+graphics(wsop)
 
-	print("Players: {}".format(wsop.players))
-	print("Board: {}".format(wsop.board))
 
-	# print(wsop.players["hero"].pool)
-	print("Hero: {}".format(wsop.players[0].hand))
-	print("Villain: {}".format(wsop.players[1].hand))
+# dealTable(wsop)
+# dealTable(wsop)
+# dealTable(wsop)
+# dealTable(wsop)
 
-	print()
-	winner = showdown(p1, p2)
-	if(winner):
-		print("Winner: {}".format(winner.hand))
-	else:
-		print("Chop")
+#debug
+# p1.holeCards = ["2d", "3s"]
+# p2.holeCards = ["2d", "8d"]
+# wsop.board = ["Qc", "Ad", "Jc", "Ts", "7d"]
+# update(wsop)
 
-	# userInput = input("continue? y/n\n")
-	# if(userInput != "y"):
-	# 	go = False
-"""
+# userInput = input("continue? y/n\n")
+# if(userInput != "y"):
+# 	go = False
