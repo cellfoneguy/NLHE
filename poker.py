@@ -279,15 +279,25 @@ def update(table):
 
 def loadImages(pics):
 	#loads images from file, resizes them, get_rects them
+	cW = 56
+	cH = 76
+
 	pics["As"] = pygame.image.load(os.path.join('Cards', 'As.png'))
-	pics["As"] = pygame.transform.smoothscale(pics["As"], (56, 76))
+	pics["As"] = pygame.transform.smoothscale(pics["As"], (cW, cH))
 	pics["AsRect"] = pics["As"].get_rect()
 
 def graphics():
+	#set graphics variables
+	screenW = 800
+	screenH = 600
+	dividerH = 450
+
+	size = (screenW, screenH)
 	pics = {}
+
+
 	loadImages(pics)
 	pygame.init()
-	size = (800, 600)
 	screen = pygame.display.set_mode(size)
 	pygame.display.set_caption("Texas Hold'em")
 
@@ -318,6 +328,7 @@ def graphics():
 		screen.fill(WHITE)
 
 		# --- Drawing code should go here
+		pygame.draw.line(screen, BLACK, [0, dividerH], [screenW, dividerH], 3)
 		screen.blit(pics["As"], pics["AsRect"])
 
 		# --- Go ahead and update the screen with what we've drawn.
