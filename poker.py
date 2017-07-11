@@ -5,6 +5,8 @@ import random
 import classes
 import string
 import pygame
+import os
+
 
 #maps card number to its value
 values = {'1':1, '2':2, '3':3, '4':4, '5':5, '6':6, '7':7, '8':8, '9':9,\
@@ -275,7 +277,14 @@ def update(table):
 		player.pool = sortCards(player.pool)
 		player.hand = evalHand(player.pool)
 
+def loadImages(pics):
+	pics["As"] = pygame.image.load(os.path.join('Cards', 'As.png'))
+	pics["As"] = pygame.transform.smoothscale(pics["As"], (56, 76))
+	pics["AsRect"] = pics["As"].get_rect()
+
 def graphics():
+	pics = {}
+	loadImages(pics)
 	pygame.init()
 	size = (800, 600)
 	screen = pygame.display.set_mode(size)
@@ -308,7 +317,7 @@ def graphics():
 		screen.fill(WHITE)
 
 		# --- Drawing code should go here
-
+		screen.blit(pics["As"], pics["AsRect"])
 
 		# --- Go ahead and update the screen with what we've drawn.
 		pygame.display.flip()
