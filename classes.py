@@ -1,13 +1,6 @@
 #Alex Bai
 #poker classes
 
-import wx
-
-class Poker(wx.Frame):
-	def __init__(self, parent, title):
-		super(Poker, self).__init__(parent, title=title, size=(800,600))
-		self.Centre()
-
 
 class Player():
 	#holds information about each player
