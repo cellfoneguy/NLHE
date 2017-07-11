@@ -300,14 +300,15 @@ def graphics(table):
 	cW = 56
 	cH = 76
 	bTop = dividerH/2 - cH/2
-	bf1 = (bTop, 250)
-	bf2 = (bTop, 310)
-	bf3 = (bTop, 370)
-	bt = (bTop, 430)
-	br = (bTop, 490)
+	bf1 = (250, bTop)
+	bf2 = (310, bTop)
+	bf3 = (370, bTop)
+	bt = (430, bTop)
+	br = (490, bTop)
 
 	size = (screenW, screenH)
-	hcPos = {"bm1": ((screenW/2 - cW), 350), "bm2": ((screenW/2), 350)}
+	cPos = {"bf1": bf1, "bf2": bf2, "bf3": bf3, "bt": bt, "br": br,\
+		"bm1": ((screenW/2 - cW), 350), "bm2": ((screenW/2), 350)}
 	pics = {}
 
 
@@ -356,9 +357,23 @@ def graphics(table):
 		# --- Drawing code should go here
 		loadBG(screen, pics, cW, cH)
 		if(table.players[0].holeCards):
-			loadCard(screen, pics, table.players[0].holeCards[0], cW, cH, hcPos["bm1"])
-			loadCard(screen, pics, table.players[0].holeCards[1], cW, cH, hcPos["bm2"])
-		if(table.status == "flop")
+			loadCard(screen, pics, table.players[0].holeCards[0], cW, cH, cPos["bm1"])
+			loadCard(screen, pics, table.players[0].holeCards[1], cW, cH, cPos["bm2"])
+		if(table.status == "flop"):
+			loadCard(screen, pics, table.board[0], cW, cH, cPos["bf1"])
+			loadCard(screen, pics, table.board[1], cW, cH, cPos["bf2"])
+			loadCard(screen, pics, table.board[2], cW, cH, cPos["bf3"])
+		elif(table.status == "turn"):
+			loadCard(screen, pics, table.board[0], cW, cH, cPos["bf1"])
+			loadCard(screen, pics, table.board[1], cW, cH, cPos["bf2"])
+			loadCard(screen, pics, table.board[2], cW, cH, cPos["bf3"])
+			loadCard(screen, pics, table.board[3], cW, cH, cPos["bt"])
+		elif(table.status == "river" or table.status == "done"):
+			loadCard(screen, pics, table.board[0], cW, cH, cPos["bf1"])
+			loadCard(screen, pics, table.board[1], cW, cH, cPos["bf2"])
+			loadCard(screen, pics, table.board[2], cW, cH, cPos["bf3"])
+			loadCard(screen, pics, table.board[3], cW, cH, cPos["bt"])
+			loadCard(screen, pics, table.board[4], cW, cH, cPos["br"])
 
 		# --- Go ahead and update the screen with what we've drawn.
 		pygame.display.flip()
