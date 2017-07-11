@@ -16,6 +16,9 @@ values = {'1':1, '2':2, '3':3, '4':4, '5':5, '6':6, '7':7, '8':8, '9':9,\
 handRanks = {"high": 1, "pair":2, "twoPair":3, "trips":4, "straight":5,\
 	"flush":6, "fullHouse":7, "quads":8, "straightFlush": 9}
 
+#seats
+seats = ("bm", "bl", "tl", "tm", "tr", "br")
+
 # Define some colors
 BLACK    = (   0,   0,   0)
 WHITE    = ( 255, 255, 255)
@@ -140,8 +143,7 @@ def findQuads(pool, counts):
 			quads = [card for card in pool if card[0] == key]
 			removed = [card for card in pool if card[0] != key]
 			return quads + removed[:1]
-		else:
-			return False
+	return False
 
 def findFullHouse(pool, counts):
 	#finds fullHouse or False
@@ -169,8 +171,7 @@ def findTrips(pool, counts):
 			trips = [card for card in pool if card[0] == key]
 			removed = [card for card in pool if card[0] != key]
 			return trips + removed[:2]
-		else:
-			return False
+	return False
 
 def findTwoPair(pool, counts):
 	#finds twoPair or False
@@ -250,8 +251,8 @@ def showdown(p1, p2):
 	#returns winning player
 	p1HandRank = handRanks[p1.hand[0]]
 	p2HandRank = handRanks[p2.hand[0]]
-	p1Hand = p1.hand[0]
-	p2Hand = p2.hand[0]
+	p1Hand = p1.hand[1]
+	p2Hand = p2.hand[1]
 
 	if(p1HandRank > p2HandRank):
 		return p1
@@ -259,17 +260,16 @@ def showdown(p1, p2):
 		return p2
 	else:
 		#hand ranks are the same, compare values or kickers
-		for index in range(len(p1Hand[1])):
-			p1Card = p1.hand[1][index]
-			p2Card = p2.hand[1][index]
+		for index in range(len(p1Hand)):
+			p1Card = p1Hand[index]
+			p2Card = p2Hand[index]
 			p1Value = values[p1Card[0]]
 			p2Value = values[p2Card[0]]
+			print(p1Value, p2Value)
 			if(p1Value > p2Value):
 				return p1
 			elif(p1Value < p2Value):
 				return p2
-			else:
-				continue
 		return None
 
 def update(table):
@@ -308,7 +308,9 @@ def graphics(table):
 
 	size = (screenW, screenH)
 	cPos = {"bf1": bf1, "bf2": bf2, "bf3": bf3, "bt": bt, "br": br,\
-		"bm1": ((screenW/2 - cW), 350), "bm2": ((screenW/2), 350)}
+		"bm1": ((screenW/2 - cW), 350), "bm2": ((screenW/2), 350), \
+		"bl1": (100, 300), "bl2": (156, 300),\
+		"tm1": ((screenW/2 - cW), 100), "tm2": ((screenW/2 - cW), 100)}
 	pics = {}
 
 
@@ -356,9 +358,12 @@ def graphics(table):
 
 		# --- Drawing code should go here
 		loadBG(screen, pics, cW, cH)
-		if(table.players[0].holeCards):
-			loadCard(screen, pics, table.players[0].holeCards[0], cW, cH, cPos["bm1"])
-			loadCard(screen, pics, table.players[0].holeCards[1], cW, cH, cPos["bm2"])
+		for index in range(len(table.players)):
+			if(table.players[index].holeCards):
+				loadCard(screen, pics, table.players[index].holeCards[0],\
+					cW, cH, cPos["{}1".format(seats[index])])
+				loadCard(screen, pics, table.players[index].holeCards[1],\
+					cW, cH, cPos["{}2".format(seats[index])])
 		if(table.status == "flop"):
 			loadCard(screen, pics, table.board[0], cW, cH, cPos["bf1"])
 			loadCard(screen, pics, table.board[1], cW, cH, cPos["bf2"])
