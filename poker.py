@@ -278,6 +278,7 @@ def update(table):
 		player.hand = evalHand(player.pool)
 
 def loadImages(pics):
+	#loads images from file, resizes them, get_rects them
 	pics["As"] = pygame.image.load(os.path.join('Cards', 'As.png'))
 	pics["As"] = pygame.transform.smoothscale(pics["As"], (56, 76))
 	pics["AsRect"] = pics["As"].get_rect()
