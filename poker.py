@@ -380,7 +380,7 @@ def run(table):
 					cW, cH, cPos["{}1".format(seats[index])])
 				loadCard(screen, pics, table.players[index].holeCards[1],\
 					cW, cH, cPos["{}2".format(seats[index])])
-		if(table.status == "flop"):3
+		if(table.status == "flop"):
 			loadCard(screen, pics, table.board[0], cW, cH, cPos["bf1"])
 			loadCard(screen, pics, table.board[1], cW, cH, cPos["bf2"])
 			loadCard(screen, pics, table.board[2], cW, cH, cPos["bf3"])
