@@ -353,14 +353,17 @@ def run(table):
 					dealTable(table)
 			elif event.type == pygame.MOUSEBUTTONDOWN:
 				click = event.pos
+				if(680<click[0]<780 and 470<click[1]<510):
+					dealTable(table)
+				
 
 		# --- Game logic should go here
 		if(table.status == "river"):
 			#debug
-			p1.holeCards = ["Td", "3d"]
-			p2.holeCards = ["9c", "Qc"]
-			wsop.board = ["7d", "4s", "7c", "3h", "4h"]
-			update(wsop)
+			# p1.holeCards = ["Td", "3d"]
+			# p2.holeCards = ["9c", "Qc"]
+			# wsop.board = ["7d", "4s", "7c", "3h", "4h"]
+			# update(wsop)
 
 			print("Players: {}".format(wsop.players))
 			print("Board: {}".format(wsop.board))
