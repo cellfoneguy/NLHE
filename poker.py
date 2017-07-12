@@ -183,6 +183,7 @@ def findTwoPair(pool, counts):
 		if(len(counts[key]) == 2):
 			pairhi = [card for card in pool if card[0] == key]
 			removed = [card for card in pool if card[0] != key]
+			break
 	if(pairhi is []):
 		return False
 	counts = findCounts(removed)
@@ -345,12 +346,22 @@ def run(table):
 			if event.type == pygame.QUIT:
 				done = True
 			elif event.type == pygame.KEYDOWN:
-				dealTable(table)
+				key = event.key
+				if(key == pygame.K_ESCAPE):
+					wsop.reset()
+				elif(key == pygame.K_SPACE):
+					dealTable(table)
 			elif event.type == pygame.MOUSEBUTTONDOWN:
 				click = event.pos
 
 		# --- Game logic should go here
 		if(table.status == "river"):
+			#debug
+			p1.holeCards = ["Td", "3d"]
+			p2.holeCards = ["9c", "Qc"]
+			wsop.board = ["7d", "4s", "7c", "3h", "4h"]
+			update(wsop)
+
 			print("Players: {}".format(wsop.players))
 			print("Board: {}".format(wsop.board))
 
@@ -402,7 +413,8 @@ def run(table):
 			loadCard(screen, pics, table.board[3], cW, cH, cPos["bt"])
 			loadCard(screen, pics, table.board[4], cW, cH, cPos["br"])
 			if(table.winner):
-				screen.blit(winText,(100, 100))
+				screen.blit(winText,(cPos["{}1".format(winner.seat)][0],\
+					cPos["{}1".format(winner.seat)][1] - 25))
 
 		# --- Go ahead and update the screen with what we've drawn.
 		pygame.display.flip()
@@ -419,7 +431,9 @@ wsop = classes.Table()
 p1 = classes.Player()
 p2 = classes.Player()
 p1.name = "Hero"
+p1.seat = "bm"
 p2.name = "Villain"
+p2.seat = "bl"
 wsop.players.append(p1)
 wsop.players.append(p2)
 

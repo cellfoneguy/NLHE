@@ -19,8 +19,6 @@ class Player():
 			self.holeCards[1]))
 
 	def reset(self):
-		self.position = ""
-		self.stack = 100
 		self.holeCards = []
 		self.pool = []
 		self.hand = None
