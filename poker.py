@@ -25,6 +25,7 @@ WHITE    = ( 255, 255, 255)
 GREEN    = (   0, 255,   0)
 RED      = ( 255,   0,   0)
 BLUE     = (   0,   0, 255)
+GRAY	 = ( 220, 220, 220)
 
 def dealCard(table):
 	#pops a random card from the remaining deck.
@@ -291,6 +292,11 @@ def loadBG(screen, pics, cW, cH):
 	pics["bgRect"] = pics["bg"].get_rect()
 	screen.blit(pics["bg"], pics["bgRect"])
 
+def loadUI(screen):
+	#loads buttons and boxes
+	pygame.draw.rect(screen, GRAY, (680, 470, 100, 40))
+	pass
+
 def graphics(table):
 	#set graphics variables
 	screenW = 800
@@ -361,6 +367,7 @@ def graphics(table):
 
 		# --- Drawing code should go here
 		loadBG(screen, pics, cW, cH)
+		loadUI(screen)
 		for index in range(len(table.players)):
 			if(table.players[index].holeCards):
 				loadCard(screen, pics, table.players[index].holeCards[0],\
