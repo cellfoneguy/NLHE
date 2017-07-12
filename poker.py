@@ -351,6 +351,8 @@ def run(table):
 					wsop.reset()
 				elif(key == pygame.K_SPACE):
 					dealTable(table)
+				elif(key == pygame.K_q):
+					done = True
 			elif event.type == pygame.MOUSEBUTTONDOWN:
 				click = event.pos
 				if(680<click[0]<780 and 470<click[1]<510):
