@@ -294,10 +294,16 @@ def loadBG(screen, pics, cW, cH):
 
 def loadUI(screen):
 	#loads buttons and boxes
-	pygame.draw.rect(screen, GRAY, (680, 470, 100, 40))
-	pass
+	mouse = pygame.mouse.get_pos()
+	buttonFont = pygame.font.SysFont("Arial", 32)
 
-def graphics(table):
+	if(680<mouse[0]<780 and 470<mouse[1]<510):
+		pygame.draw.rect(screen, BLACK, (678, 468, 104, 44))
+	pygame.draw.rect(screen, GRAY, (680, 470, 100, 40))
+	raiseText = buttonFont.render('Raise', False, BLACK)
+	screen.blit(raiseText, (700, 480))
+
+def run(table):
 	#set graphics variables
 	screenW = 800
 	screenH = 600
@@ -321,8 +327,8 @@ def graphics(table):
 
 	pygame.init()
 	pygame.font.init()
-	myfont = pygame.font.SysFont('Arial', 40)
-	textsurface = myfont.render('Winner', False, BLACK)
+	winFont = pygame.font.SysFont('Arial', 40)
+	winText = winFont.render('Winner', False, BLACK)
 	screen = pygame.display.set_mode(size)
 	pygame.display.set_caption("Texas Hold'em")
 
@@ -341,7 +347,7 @@ def graphics(table):
 			elif event.type == pygame.KEYDOWN:
 				dealTable(table)
 			elif event.type == pygame.MOUSEBUTTONDOWN:
-				table.reset()
+				click = event.pos
 
 		# --- Game logic should go here
 		if(table.status == "river"):
@@ -374,7 +380,7 @@ def graphics(table):
 					cW, cH, cPos["{}1".format(seats[index])])
 				loadCard(screen, pics, table.players[index].holeCards[1],\
 					cW, cH, cPos["{}2".format(seats[index])])
-		if(table.status == "flop"):
+		if(table.status == "flop"):3
 			loadCard(screen, pics, table.board[0], cW, cH, cPos["bf1"])
 			loadCard(screen, pics, table.board[1], cW, cH, cPos["bf2"])
 			loadCard(screen, pics, table.board[2], cW, cH, cPos["bf3"])
@@ -396,7 +402,7 @@ def graphics(table):
 			loadCard(screen, pics, table.board[3], cW, cH, cPos["bt"])
 			loadCard(screen, pics, table.board[4], cW, cH, cPos["br"])
 			if(table.winner):
-				screen.blit(textsurface,(100, 100))
+				screen.blit(winText,(100, 100))
 
 		# --- Go ahead and update the screen with what we've drawn.
 		pygame.display.flip()
@@ -419,7 +425,7 @@ wsop.players.append(p2)
 
 
 wsop.reset()
-graphics(wsop)
+run(wsop)
 
 
 # dealTable(wsop)
