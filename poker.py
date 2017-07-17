@@ -6,6 +6,7 @@ import classes
 import string
 import pygame
 import os
+import inputbox
 
 
 #maps card number to its value
@@ -310,13 +311,18 @@ def loadBG(screen, pics, cW, cH):
 def loadUI(screen):
 	#loads buttons and boxes
 	mouse = pygame.mouse.get_pos()
-	buttonFont = pygame.font.SysFont("Arial", 32)
+	buttonFont = pygame.font.SysFont(None, 32)
 
 	if(680<mouse[0]<780 and 470<mouse[1]<510):
 		pygame.draw.rect(screen, BLACK, (678, 468, 104, 44))
 	pygame.draw.rect(screen, GRAY, (680, 470, 100, 40))
 	raiseText = buttonFont.render('Raise', False, BLACK)
 	screen.blit(raiseText, (700, 480))
+
+def text(screen, text, size, color, left, top):
+	tempFont = pygame.font.SysFont(None, size)
+	tempText = tempFont.render(text, False, color)
+	screen.blit(tempText, left, top)
 
 def run(table):
 	#set graphics variables
@@ -333,19 +339,19 @@ def run(table):
 	br = (490, bTop)
 
 	size = (screenW, screenH)
-	cPos = {"bf1": bf1, "bf2": bf2, "bf3": bf3, "bt": bt, "br": br,\
-		"bm1": ((screenW/2 - cW), 350), "bm2": ((screenW/2), 350),\
-		"bl1": (100, 300), "bl2": (156, 300),\
-		"tl1": (100, 70), "tl2": (156, 70),\
-		"tm1": ((screenW/2 - cW), 30), "tm2": ((screenW/2), 30),\
-		"tr1": (580, 70), "tr2": (636, 70),\
-		"br1": (580, 300), "br2": (636, 300)\
+	cPos = {"flop1": bf1, "flop2": bf2, "flop3": bf3, "turn": bt, "river": br,\
+		"bm": (((screenW/2 - cW), 350), ((screenW/2), 350)),\
+		"bl": ((100, 300), (156, 300)),\
+		"tl": ((100, 70), (156, 70)),\
+		"tm": (((screenW/2 - cW), 30), ((screenW/2), 30)),\
+		"tr": ((580, 70), (636, 70)),\
+		"br": ((580, 300), (636, 300))\
 		}
 	pics = {}
 
 	pygame.init()
 	pygame.font.init()
-	winFont = pygame.font.SysFont('Arial', 40)
+	winFont = pygame.font.SysFont(None, 40)
 	winText = winFont.render('Winner', False, BLACK)
 	screen = pygame.display.set_mode(size)
 	pygame.display.set_caption("Texas Hold'em")
@@ -372,7 +378,8 @@ def run(table):
 					done = True
 				elif(key == pygame.K_a and table.status == "ante" and\
 					len(table.players) < 6):
-					table.addPlayer("testName", seats[len(table.players)])
+					name = inputbox.ask(screen, "Player Name: ")
+					table.addPlayer(name, seats[len(table.players)])
 			elif event.type == pygame.MOUSEBUTTONDOWN:
 				click = event.pos
 				if(680<click[0]<780 and 470<click[1]<510):
@@ -410,36 +417,39 @@ def run(table):
 		# --- Drawing code should go here
 		loadBG(screen, pics, cW, cH)
 		loadUI(screen)
-		for index in range(len(table.players)):
-			if(table.players[index].holeCards):
-				loadCard(screen, pics, table.players[index].holeCards[0],\
-					cW, cH, cPos["{}1".format(table.players[index].seat)])
-				loadCard(screen, pics, table.players[index].holeCards[1],\
-					cW, cH, cPos["{}2".format(table.players[index].seat)])
+		for player in table.players:
+			text = player.name
+
+			if(player.holeCards):
+				loadCard(screen, pics, player.holeCards[0],\
+					cW, cH, cPos[player.seat][0])
+				loadCard(screen, pics, player.holeCards[1],\
+					cW, cH, cPos[player.seat][1])
 		if(table.status == "flop"):
-			loadCard(screen, pics, table.board[0], cW, cH, cPos["bf1"])
-			loadCard(screen, pics, table.board[1], cW, cH, cPos["bf2"])
-			loadCard(screen, pics, table.board[2], cW, cH, cPos["bf3"])
+			loadCard(screen, pics, table.board[0], cW, cH, cPos["flop1"])
+			loadCard(screen, pics, table.board[1], cW, cH, cPos["flop2"])
+			loadCard(screen, pics, table.board[2], cW, cH, cPos["flop3"])
 		elif(table.status == "turn"):
-			loadCard(screen, pics, table.board[0], cW, cH, cPos["bf1"])
-			loadCard(screen, pics, table.board[1], cW, cH, cPos["bf2"])
-			loadCard(screen, pics, table.board[2], cW, cH, cPos["bf3"])
-			loadCard(screen, pics, table.board[3], cW, cH, cPos["bt"])
+			loadCard(screen, pics, table.board[0], cW, cH, cPos["flop1"])
+			loadCard(screen, pics, table.board[1], cW, cH, cPos["flop2"])
+			loadCard(screen, pics, table.board[2], cW, cH, cPos["flop3"])
+			loadCard(screen, pics, table.board[3], cW, cH, cPos["turn"])
 		elif(table.status == "river"):
-			loadCard(screen, pics, table.board[0], cW, cH, cPos["bf1"])
-			loadCard(screen, pics, table.board[1], cW, cH, cPos["bf2"])
-			loadCard(screen, pics, table.board[2], cW, cH, cPos["bf3"])
-			loadCard(screen, pics, table.board[3], cW, cH, cPos["bt"])
-			loadCard(screen, pics, table.board[4], cW, cH, cPos["br"])
+			loadCard(screen, pics, table.board[0], cW, cH, cPos["flop1"])
+			loadCard(screen, pics, table.board[1], cW, cH, cPos["flop2"])
+			loadCard(screen, pics, table.board[2], cW, cH, cPos["flop3"])
+			loadCard(screen, pics, table.board[3], cW, cH, cPos["turn"])
+			loadCard(screen, pics, table.board[4], cW, cH, cPos["river"])
 		elif(table.status == "done"):
-			loadCard(screen, pics, table.board[0], cW, cH, cPos["bf1"])
-			loadCard(screen, pics, table.board[1], cW, cH, cPos["bf2"])
-			loadCard(screen, pics, table.board[2], cW, cH, cPos["bf3"])
-			loadCard(screen, pics, table.board[3], cW, cH, cPos["bt"])
-			loadCard(screen, pics, table.board[4], cW, cH, cPos["br"])
+			loadCard(screen, pics, table.board[0], cW, cH, cPos["flop1"])
+			loadCard(screen, pics, table.board[1], cW, cH, cPos["flop2"])
+			loadCard(screen, pics, table.board[2], cW, cH, cPos["flop3"])
+			loadCard(screen, pics, table.board[3], cW, cH, cPos["turn"])
+			loadCard(screen, pics, table.board[4], cW, cH, cPos["river"])
 			if(table.winner):
-				screen.blit(winText,(cPos["{}1".format(table.winner.seat)][0],\
-					cPos["{}1".format(table.winner.seat)][1] - 25))
+				#text(screen, "Winner", 40, BLACK, )
+				screen.blit(winText,(cPos[table.winner.seat][0][0] + 5,\
+					cPos[table.winner.seat][0][1] - 27))
 
 		# --- Go ahead and update the screen with what we've drawn.
 		pygame.display.flip()
