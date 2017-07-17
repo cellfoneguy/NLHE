@@ -263,9 +263,6 @@ def multiShowdown(players):
 
 def showdown(p1, p2):
 	#returns winning player
-	print(p1)
-	print(p2)
-	print()
 	p1HandRank = handRanks[p1.hand[0]]
 	p2HandRank = handRanks[p2.hand[0]]
 	p1Hand = p1.hand[1]
@@ -319,10 +316,46 @@ def loadUI(screen):
 	raiseText = buttonFont.render('Raise', False, BLACK)
 	screen.blit(raiseText, (700, 480))
 
-def text(screen, text, size, color, left, top):
+def loadPlayers(screen, table, pics, cW, cH, cPos):
+	for player in table.players:
+		text = player.name
+		if(player.holeCards):
+			loadCard(screen, pics, player.holeCards[0],\
+				cW, cH, cPos[player.seat][0])
+			loadCard(screen, pics, player.holeCards[1],\
+				cW, cH, cPos[player.seat][1])
+
+def loadBoard(screen, table, pics, cW, cH, cPos):
+	if(table.status == "flop"):
+		loadCard(screen, pics, table.board[0], cW, cH, cPos["flop1"])
+		loadCard(screen, pics, table.board[1], cW, cH, cPos["flop2"])
+		loadCard(screen, pics, table.board[2], cW, cH, cPos["flop3"])
+	elif(table.status == "turn"):
+		loadCard(screen, pics, table.board[0], cW, cH, cPos["flop1"])
+		loadCard(screen, pics, table.board[1], cW, cH, cPos["flop2"])
+		loadCard(screen, pics, table.board[2], cW, cH, cPos["flop3"])
+		loadCard(screen, pics, table.board[3], cW, cH, cPos["turn"])
+	elif(table.status == "river"):
+		loadCard(screen, pics, table.board[0], cW, cH, cPos["flop1"])
+		loadCard(screen, pics, table.board[1], cW, cH, cPos["flop2"])
+		loadCard(screen, pics, table.board[2], cW, cH, cPos["flop3"])
+		loadCard(screen, pics, table.board[3], cW, cH, cPos["turn"])
+		loadCard(screen, pics, table.board[4], cW, cH, cPos["river"])
+	elif(table.status == "done"):
+		loadCard(screen, pics, table.board[0], cW, cH, cPos["flop1"])
+		loadCard(screen, pics, table.board[1], cW, cH, cPos["flop2"])
+		loadCard(screen, pics, table.board[2], cW, cH, cPos["flop3"])
+		loadCard(screen, pics, table.board[3], cW, cH, cPos["turn"])
+		loadCard(screen, pics, table.board[4], cW, cH, cPos["river"])
+		if(table.winner):
+			drawText(screen, "Winner", 40, BLACK,\
+				cPos[table.winner.seat][0][0] + 5,\
+				cPos[table.winner.seat][0][1] - 27)
+
+def drawText(screen, text, size, color, left, top):
 	tempFont = pygame.font.SysFont(None, size)
 	tempText = tempFont.render(text, False, color)
-	screen.blit(tempText, left, top)
+	screen.blit(tempText, (left, top))
 
 def run(table):
 	#set graphics variables
@@ -337,7 +370,6 @@ def run(table):
 	bf3 = (370, bTop)
 	bt = (430, bTop)
 	br = (490, bTop)
-
 	size = (screenW, screenH)
 	cPos = {"flop1": bf1, "flop2": bf2, "flop3": bf3, "turn": bt, "river": br,\
 		"bm": (((screenW/2 - cW), 350), ((screenW/2), 350)),\
@@ -351,8 +383,6 @@ def run(table):
 
 	pygame.init()
 	pygame.font.init()
-	winFont = pygame.font.SysFont(None, 40)
-	winText = winFont.render('Winner', False, BLACK)
 	screen = pygame.display.set_mode(size)
 	pygame.display.set_caption("Texas Hold'em")
 
@@ -372,7 +402,7 @@ def run(table):
 				key = event.key
 				if(key == pygame.K_ESCAPE):
 					wsop.reset()
-				elif(key == pygame.K_SPACE):
+				elif(key == pygame.K_SPACE and len(table.players) >= 2):
 					dealTable(table)
 				elif(key == pygame.K_q):
 					done = True
@@ -398,14 +428,10 @@ def run(table):
 			print("Players: {}".format(wsop.players))
 			print("Board: {}".format(wsop.board))
 
-			#print(wsop.players["hero"].pool)
-			#print("Hero: {}".format(wsop.players[0].hand))
-			#print("Villain: {}".format(wsop.players[1].hand))
-
 			print()
 			winner = multiShowdown(wsop.players)
 			if(len(winner) == 1):
-				print("Winner: {}".format(winner[0].hand))
+				print("Winner: {} with {}".format(winner[0].name, winner[0].hand))
 				table.winner = winner[0]
 			else:
 				print("Chop")
@@ -417,39 +443,8 @@ def run(table):
 		# --- Drawing code should go here
 		loadBG(screen, pics, cW, cH)
 		loadUI(screen)
-		for player in table.players:
-			text = player.name
-
-			if(player.holeCards):
-				loadCard(screen, pics, player.holeCards[0],\
-					cW, cH, cPos[player.seat][0])
-				loadCard(screen, pics, player.holeCards[1],\
-					cW, cH, cPos[player.seat][1])
-		if(table.status == "flop"):
-			loadCard(screen, pics, table.board[0], cW, cH, cPos["flop1"])
-			loadCard(screen, pics, table.board[1], cW, cH, cPos["flop2"])
-			loadCard(screen, pics, table.board[2], cW, cH, cPos["flop3"])
-		elif(table.status == "turn"):
-			loadCard(screen, pics, table.board[0], cW, cH, cPos["flop1"])
-			loadCard(screen, pics, table.board[1], cW, cH, cPos["flop2"])
-			loadCard(screen, pics, table.board[2], cW, cH, cPos["flop3"])
-			loadCard(screen, pics, table.board[3], cW, cH, cPos["turn"])
-		elif(table.status == "river"):
-			loadCard(screen, pics, table.board[0], cW, cH, cPos["flop1"])
-			loadCard(screen, pics, table.board[1], cW, cH, cPos["flop2"])
-			loadCard(screen, pics, table.board[2], cW, cH, cPos["flop3"])
-			loadCard(screen, pics, table.board[3], cW, cH, cPos["turn"])
-			loadCard(screen, pics, table.board[4], cW, cH, cPos["river"])
-		elif(table.status == "done"):
-			loadCard(screen, pics, table.board[0], cW, cH, cPos["flop1"])
-			loadCard(screen, pics, table.board[1], cW, cH, cPos["flop2"])
-			loadCard(screen, pics, table.board[2], cW, cH, cPos["flop3"])
-			loadCard(screen, pics, table.board[3], cW, cH, cPos["turn"])
-			loadCard(screen, pics, table.board[4], cW, cH, cPos["river"])
-			if(table.winner):
-				#text(screen, "Winner", 40, BLACK, )
-				screen.blit(winText,(cPos[table.winner.seat][0][0] + 5,\
-					cPos[table.winner.seat][0][1] - 27))
+		loadPlayers(screen, table, pics, cW, cH, cPos)
+		loadBoard(screen, table, pics, cW, cH, cPos)
 
 		# --- Go ahead and update the screen with what we've drawn.
 		pygame.display.flip()
@@ -462,21 +457,6 @@ def run(table):
 
 
 wsop = classes.Table()
-
-p1 = classes.Player()
-p2 = classes.Player()
-p3 = classes.Player()
-p1.name = "Hero"
-p1.seat = "bm"
-p2.name = "Villain"
-p2.seat = "bl"
-p3.name = "Villain 2"
-p3.seat = "tl"
-wsop.players.append(p1)
-wsop.players.append(p2)
-wsop.players.append(p3)
-
-
 wsop.reset()
 run(wsop)
 
