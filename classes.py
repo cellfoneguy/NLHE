@@ -48,3 +48,9 @@ class Table():
 		self.winner = None
 		for player in self.players:
 			player.reset()
+
+	def addPlayer(self, name, seat):
+		p = Player()
+		p.name = name
+		p.seat = seat
+		self.players.append(p)

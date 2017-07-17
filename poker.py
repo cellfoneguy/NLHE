@@ -87,7 +87,6 @@ def findFlush(pool):
 	for key in segregated:
 		if(len(segregated[key]) >= 5):
 			return segregated[key]
-			#return (key, segregated[key])
 	return False
 
 def findStraight(pool):
@@ -210,10 +209,7 @@ def evalHand(pool):
 	#separates finding different hands. also inefficient but prettier.
 	counts = findCounts(pool)
 	flush = findFlush(pool)
-	if(flush):
-		straightFlush = findStraight(flush)
-	else:
-		straightFlush = False
+	straightFlush = findStraight(flush) if flush else False
 	quads = findQuads(pool, counts)
 	fullHouse = findFullHouse(pool, counts)
 	straight = findStraight(pool)
@@ -249,8 +245,26 @@ def evalHand(pool):
 		#no hand at all
 		return ("high", pool[:5])
 
+def multiShowdown(players):
+	#can't handle 3-way chopped pots
+	winner = players[0]
+	chops = []
+	for player in players[1:]:
+		newWinner = showdown(winner, player)
+		if(newWinner is None):
+			chops.append(winner)
+			chops.append(player)
+			winner = player
+		else:
+			winner = newWinner
+			chops = [winner]
+	return chops
+
 def showdown(p1, p2):
 	#returns winning player
+	print(p1)
+	print(p2)
+	print()
 	p1HandRank = handRanks[p1.hand[0]]
 	p2HandRank = handRanks[p2.hand[0]]
 	p1Hand = p1.hand[1]
@@ -320,11 +334,14 @@ def run(table):
 
 	size = (screenW, screenH)
 	cPos = {"bf1": bf1, "bf2": bf2, "bf3": bf3, "bt": bt, "br": br,\
-		"bm1": ((screenW/2 - cW), 350), "bm2": ((screenW/2), 350), \
+		"bm1": ((screenW/2 - cW), 350), "bm2": ((screenW/2), 350),\
 		"bl1": (100, 300), "bl2": (156, 300),\
-		"tm1": ((screenW/2 - cW), 100), "tm2": ((screenW/2 - cW), 100)}
+		"tl1": (100, 70), "tl2": (156, 70),\
+		"tm1": ((screenW/2 - cW), 30), "tm2": ((screenW/2), 30),\
+		"tr1": (580, 70), "tr2": (636, 70),\
+		"br1": (580, 300), "br2": (636, 300)\
+		}
 	pics = {}
-
 
 	pygame.init()
 	pygame.font.init()
@@ -353,10 +370,14 @@ def run(table):
 					dealTable(table)
 				elif(key == pygame.K_q):
 					done = True
+				elif(key == pygame.K_a and table.status == "ante" and\
+					len(table.players) < 6):
+					table.addPlayer("testName", seats[len(table.players)])
 			elif event.type == pygame.MOUSEBUTTONDOWN:
 				click = event.pos
 				if(680<click[0]<780 and 470<click[1]<510):
 					dealTable(table)
+				print(event.pos)
 
 
 		# --- Game logic should go here
@@ -370,15 +391,15 @@ def run(table):
 			print("Players: {}".format(wsop.players))
 			print("Board: {}".format(wsop.board))
 
-			# print(wsop.players["hero"].pool)
-			print("Hero: {}".format(wsop.players[0].hand))
-			print("Villain: {}".format(wsop.players[1].hand))
+			#print(wsop.players["hero"].pool)
+			#print("Hero: {}".format(wsop.players[0].hand))
+			#print("Villain: {}".format(wsop.players[1].hand))
 
 			print()
-			winner = showdown(p1, p2)
-			if(winner):
-				print("Winner: {}".format(winner.hand))
-				table.winner = winner
+			winner = multiShowdown(wsop.players)
+			if(len(winner) == 1):
+				print("Winner: {}".format(winner[0].hand))
+				table.winner = winner[0]
 			else:
 				print("Chop")
 			table.status = "done"
@@ -393,9 +414,9 @@ def run(table):
 		for index in range(len(table.players)):
 			if(table.players[index].holeCards):
 				loadCard(screen, pics, table.players[index].holeCards[0],\
-					cW, cH, cPos["{}1".format(seats[index])])
+					cW, cH, cPos["{}1".format(table.players[index].seat)])
 				loadCard(screen, pics, table.players[index].holeCards[1],\
-					cW, cH, cPos["{}2".format(seats[index])])
+					cW, cH, cPos["{}2".format(table.players[index].seat)])
 		if(table.status == "flop"):
 			loadCard(screen, pics, table.board[0], cW, cH, cPos["bf1"])
 			loadCard(screen, pics, table.board[1], cW, cH, cPos["bf2"])
@@ -418,8 +439,8 @@ def run(table):
 			loadCard(screen, pics, table.board[3], cW, cH, cPos["bt"])
 			loadCard(screen, pics, table.board[4], cW, cH, cPos["br"])
 			if(table.winner):
-				screen.blit(winText,(cPos["{}1".format(winner.seat)][0],\
-					cPos["{}1".format(winner.seat)][1] - 25))
+				screen.blit(winText,(cPos["{}1".format(table.winner.seat)][0],\
+					cPos["{}1".format(table.winner.seat)][1] - 25))
 
 		# --- Go ahead and update the screen with what we've drawn.
 		pygame.display.flip()
@@ -435,12 +456,16 @@ wsop = classes.Table()
 
 p1 = classes.Player()
 p2 = classes.Player()
+p3 = classes.Player()
 p1.name = "Hero"
 p1.seat = "bm"
 p2.name = "Villain"
 p2.seat = "bl"
+p3.name = "Villain 2"
+p3.seat = "tl"
 wsop.players.append(p1)
 wsop.players.append(p2)
+wsop.players.append(p3)
 
 
 wsop.reset()
