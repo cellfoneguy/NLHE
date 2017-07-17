@@ -319,6 +319,9 @@ def loadUI(screen):
 def loadPlayers(screen, table, pics, cW, cH, cPos):
 	for player in table.players:
 		text = player.name
+		drawText(screen, name, 40, BLACK,\
+		cPos[table.winner.seat][0][0] + 5,\
+		cPos[table.winner.seat][0][1] - 27)
 		if(player.holeCards):
 			loadCard(screen, pics, player.holeCards[0],\
 				cW, cH, cPos[player.seat][0])
