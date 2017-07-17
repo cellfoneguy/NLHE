@@ -318,10 +318,9 @@ def loadUI(screen):
 
 def loadPlayers(screen, table, pics, cW, cH, cPos):
 	for player in table.players:
-		text = player.name
-		drawText(screen, name, 40, BLACK,\
-		cPos[table.winner.seat][0][0] + 5,\
-		cPos[table.winner.seat][0][1] - 27)
+		drawText(screen, player.name, 20, BLACK,\
+		cPos[player.seat][0][0] + 5,\
+		cPos[player.seat][0][1] + 76)
 		if(player.holeCards):
 			loadCard(screen, pics, player.holeCards[0],\
 				cW, cH, cPos[player.seat][0])
