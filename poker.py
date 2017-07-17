@@ -404,8 +404,7 @@ def run(table):
 				print("Chop")
 			table.status = "done"
 
-		# First, clear the screen to white. Don't put other drawing commands
-		# above this, or they will be erased with this command.
+		# Clear screen
 		#screen.fill(WHITE)
 
 		# --- Drawing code should go here
@@ -470,12 +469,6 @@ wsop.players.append(p3)
 
 wsop.reset()
 run(wsop)
-
-
-# dealTable(wsop)
-# dealTable(wsop)
-# dealTable(wsop)
-# dealTable(wsop)
 
 #debug
 # p1.holeCards = ["2d", "3s"]
