@@ -335,7 +335,7 @@ def run(table):
 
 	# Loop until the user clicks the close button.
 	done = False
-	 
+
 	# Used to manage how fast the screen updates
 	clock = pygame.time.Clock()
 
@@ -357,7 +357,7 @@ def run(table):
 				click = event.pos
 				if(680<click[0]<780 and 470<click[1]<510):
 					dealTable(table)
-				
+
 
 		# --- Game logic should go here
 		if(table.status == "river"):
