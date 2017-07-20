@@ -13,10 +13,18 @@ class Player():
 		self.holeCards = []
 		self.pool = []
 		self.hand = None
+		self.canFold = False
+		self.canRaise = False
+		self.canCall = False
+		self.canCheck = False
 
 	def __repr__(self):
-		return ("{}: {} {}".format(self.name, self.holeCards[0], \
+		if(self.holeCards):
+			return ("{}: {} {}".format(self.name, self.holeCards[0], \
 			self.holeCards[1]))
+		else:
+			return self.name
+		
 
 	def reset(self):
 		self.holeCards = []
@@ -41,6 +49,9 @@ class Table():
 		self.tableSet = False
 		self.actOrder = []
 		self.positions = {}
+		self.lastRaiser = None
+		self.action = "check"
+		self.raiseAmount = 0
 
 	def reset(self):
 		self.deck = "As Ah Ad Ac 2s 2h 2d 2c 3s 3h 3d 3c 4s 4h 4d 4c "\
@@ -54,9 +65,19 @@ class Table():
 			player.reset()
 		self.actionOn = None
 		self.tableSet = False
+		self.actOrder = []
+		self.positions = {}
+		self.lastRaiser = None
+		self.action = "check"
+		self.raiseAmount = 0
 
 	def addPlayer(self, name, seat):
 		p = Player()
 		p.name = name
 		p.seat = seat
 		self.players.append(p)
+
+	def setLastActor(self, player):
+		while(self.actOrder[0] is not player):
+			self.actOrder.append(self.actOrder.pop())
+		self.actOrder.append(self.actOrder.pop())

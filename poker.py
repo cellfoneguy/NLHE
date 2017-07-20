@@ -311,13 +311,42 @@ def resolveTable(table):
 		print("Chop")
 	table.status = "done"
 
-def act(table, player):
+
+
+def act(table, player, screen, pics, cW, cH, cPos, clock):
+	# waits for a player to act. returns True if raised (changes act order)
+	player.canRaise = True
+	player.canFold = True
+	if(table.action == "check"):
+		player.canCheck = True
+	elif(table.action == "raise"):
+		player.canCall = True
+
+	waiting = True
+	while(waiting):
+		for event in pygame.event.get():
+			if(event.type == pygame.KEYDOWN):
+				key = event.key
+				if(key == pygame.K_r):
+					table.action = "raise"
+					table.raiseAmount *= 2
+					table.setLastActor(player)
+					waiting = False
+					return True
+				elif(key == pygame.K_f):
+					waiting = False
+					return False
+				elif(key == pygame.K_c):
+					waiting = False
+					return False
+		loadEverything(screen, table, pics, cW, cH, cPos, clock)
+
 
 
 #################### DRAWING FUNCTIONS ####################
 
 
-def loadCard(screen, pics, card, cW, cH, topLeft):
+def drawCard(screen, pics, card, cW, cH, topLeft):
 	#loads a card and places it
 	pics[card] = pygame.image.load\
 		(os.path.join("Cards", "{}.png".format(card))).convert()
@@ -346,34 +375,34 @@ def loadPlayers(screen, table, pics, cW, cH, cPos):
 		cPos[player.seat][0][0] + 5,\
 		cPos[player.seat][0][1] + 78, len(player.name) * 10, WHITE)
 		if(player.holeCards):
-			loadCard(screen, pics, player.holeCards[0],\
+			drawCard(screen, pics, player.holeCards[0],\
 				cW, cH, cPos[player.seat][0])
-			loadCard(screen, pics, player.holeCards[1],\
+			drawCard(screen, pics, player.holeCards[1],\
 				cW, cH, cPos[player.seat][1])
 
 def loadBoard(screen, table, pics, cW, cH, cPos):
 	# draws board cards and winner message
 	if(table.status == "flop"):
-		loadCard(screen, pics, table.board[0], cW, cH, cPos["flop1"])
-		loadCard(screen, pics, table.board[1], cW, cH, cPos["flop2"])
-		loadCard(screen, pics, table.board[2], cW, cH, cPos["flop3"])
+		drawCard(screen, pics, table.board[0], cW, cH, cPos["flop1"])
+		drawCard(screen, pics, table.board[1], cW, cH, cPos["flop2"])
+		drawCard(screen, pics, table.board[2], cW, cH, cPos["flop3"])
 	elif(table.status == "turn"):
-		loadCard(screen, pics, table.board[0], cW, cH, cPos["flop1"])
-		loadCard(screen, pics, table.board[1], cW, cH, cPos["flop2"])
-		loadCard(screen, pics, table.board[2], cW, cH, cPos["flop3"])
-		loadCard(screen, pics, table.board[3], cW, cH, cPos["turn"])
+		drawCard(screen, pics, table.board[0], cW, cH, cPos["flop1"])
+		drawCard(screen, pics, table.board[1], cW, cH, cPos["flop2"])
+		drawCard(screen, pics, table.board[2], cW, cH, cPos["flop3"])
+		drawCard(screen, pics, table.board[3], cW, cH, cPos["turn"])
 	elif(table.status == "river"):
-		loadCard(screen, pics, table.board[0], cW, cH, cPos["flop1"])
-		loadCard(screen, pics, table.board[1], cW, cH, cPos["flop2"])
-		loadCard(screen, pics, table.board[2], cW, cH, cPos["flop3"])
-		loadCard(screen, pics, table.board[3], cW, cH, cPos["turn"])
-		loadCard(screen, pics, table.board[4], cW, cH, cPos["river"])
+		drawCard(screen, pics, table.board[0], cW, cH, cPos["flop1"])
+		drawCard(screen, pics, table.board[1], cW, cH, cPos["flop2"])
+		drawCard(screen, pics, table.board[2], cW, cH, cPos["flop3"])
+		drawCard(screen, pics, table.board[3], cW, cH, cPos["turn"])
+		drawCard(screen, pics, table.board[4], cW, cH, cPos["river"])
 	elif(table.status == "done"):
-		loadCard(screen, pics, table.board[0], cW, cH, cPos["flop1"])
-		loadCard(screen, pics, table.board[1], cW, cH, cPos["flop2"])
-		loadCard(screen, pics, table.board[2], cW, cH, cPos["flop3"])
-		loadCard(screen, pics, table.board[3], cW, cH, cPos["turn"])
-		loadCard(screen, pics, table.board[4], cW, cH, cPos["river"])
+		drawCard(screen, pics, table.board[0], cW, cH, cPos["flop1"])
+		drawCard(screen, pics, table.board[1], cW, cH, cPos["flop2"])
+		drawCard(screen, pics, table.board[2], cW, cH, cPos["flop3"])
+		drawCard(screen, pics, table.board[3], cW, cH, cPos["turn"])
+		drawCard(screen, pics, table.board[4], cW, cH, cPos["river"])
 		if(table.winner):
 			drawText(screen, "Winner", 40, BLACK,\
 				cPos[table.winner.seat][0][0] + 5,\
@@ -395,7 +424,18 @@ def drawTextBox(screen, text, size, color, left, top, width, bgColor):
 	screen.blit(box, (left, top))
 	screen.blit(tempText, (left + 2, top + 2))
 
+def loadEverything(screen, table, pics, cW, cH, cPos, clock):
+	# --- Drawing code should go here
+	loadBG(screen, pics, cW, cH)
+	loadUI(screen)
+	loadPlayers(screen, table, pics, cW, cH, cPos)
+	loadBoard(screen, table, pics, cW, cH, cPos)
 
+	# --- Go ahead and update the screen with what we've drawn.
+	pygame.display.flip()
+
+	# --- Limit to 60 frames per second
+	clock.tick(60)
 
 def run(table):
 	#set graphics variables
@@ -459,32 +499,40 @@ def run(table):
 
 
 		# --- Game logic should go here
+		# TODO: TEMPORARY GAME START WHEN TWO PLAYERS 
+		if(len(table.players) >= 2):
+			# TODO: TEMPORARY ACT ORDER FOR TWO PLAYERS ####
+			table.actOrder = [table.players[0], table.players[1]]
+			while(table.tableSet == False):
+				for player in table.actOrder:
+					print(player)
+					if(player is table.actOrder[-1]):
+						# looped back around to original raiser
+						table.tableSet = True
+					print(table.status)
+					if(act(table, player, screen, pics, cW, cH, cPos, clock)):
+						# player raised, restart for loop
+						break
+					else:
+						# no order change. keep going
+						continue
+				# no raises, checked around
+				if(table.action == "check"):
+					table.tableSet = True
 
-		while(table.tableSet == False):
-			for player in table.actOrder:
-				act(table, player)
+				loadEverything(screen, table, pics, cW, cH, cPos, clock)
+			# table set
+			dealTable(table)
+			if(table.status != "river" and table.status != "done"):
+				# go again
+				table.tableSet = False
 
-			loadBG(screen, pics, cW, cH)
-			loadUI(screen)
-			loadPlayers(screen, table, pics, cW, cH, cPos)
-			loadBoard(screen, table, pics, cW, cH, cPos)
-			pygame.display.flip()
-			click.tick(60)
-
-		if(table.status == "river"):
+		if(table.status == "river" and table.tableSet == True):
 			resolveTable(table)
 
 		# --- Drawing code should go here
-		loadBG(screen, pics, cW, cH)
-		loadUI(screen)
-		loadPlayers(screen, table, pics, cW, cH, cPos)
-		loadBoard(screen, table, pics, cW, cH, cPos)
+		loadEverything(screen, table, pics, cW, cH, cPos, clock)
 
-		# --- Go ahead and update the screen with what we've drawn.
-		pygame.display.flip()
-
-		# --- Limit to 60 frames per second
-		clock.tick(60)
 	pygame.quit()
 
 
@@ -493,13 +541,3 @@ def run(table):
 wsop = classes.Table()
 wsop.reset()
 run(wsop)
-
-#debug
-# p1.holeCards = ["2d", "3s"]
-# p2.holeCards = ["2d", "8d"]
-# wsop.board = ["Qc", "Ad", "Jc", "Ts", "7d"]
-# update(wsop)
-
-# userInput = input("continue? y/n\n")
-# if(userInput != "y"):
-# 	go = False
