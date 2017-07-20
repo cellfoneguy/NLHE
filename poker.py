@@ -360,8 +360,8 @@ def loadBG(screen, pics, cW, cH):
 	pics["bgRect"] = pics["bg"].get_rect()
 	screen.blit(pics["bg"], pics["bgRect"])
 
-def loadUI(screen):
-	#loads buttons and boxes
+def loadUI(screen): # TODO: moar buttons
+	# loads buttons and boxes
 	mouse = pygame.mouse.get_pos()
 	if(680<mouse[0]<780 and 470<mouse[1]<510):
 		pygame.draw.rect(screen, BLACK, (678, 468, 104, 44))
@@ -424,7 +424,7 @@ def drawTextBox(screen, text, size, color, left, top, width, bgColor):
 	screen.blit(box, (left, top))
 	screen.blit(tempText, (left + 2, top + 2))
 
-def loadEverything(screen, table, pics, cW, cH, cPos, clock):
+def loadEverything(screen, table, pics, cW, cH, cPos, clock): # TODO: chip graphics
 	# --- Drawing code should go here
 	loadBG(screen, pics, cW, cH)
 	loadUI(screen)
@@ -438,7 +438,8 @@ def loadEverything(screen, table, pics, cW, cH, cPos, clock):
 	clock.tick(60)
 
 def run(table):
-	#set graphics variables
+	# set graphics variables
+	# TODO: no magic numbers?
 	screenW = 800
 	screenH = 600
 	dividerH = 450
@@ -535,9 +536,11 @@ def run(table):
 
 	pygame.quit()
 
+def main():
+	wsop = classes.Table()
+	wsop.reset()
+	run(wsop)
 
+if(__name__ == "__main__"):
+	main()
 
-
-wsop = classes.Table()
-wsop.reset()
-run(wsop)
