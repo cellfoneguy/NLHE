@@ -294,14 +294,15 @@ def update(table):
 
 def loadCard(screen, pics, card, cW, cH, topLeft):
 	#loads a card and places it
-	pics[card] = pygame.image.load(os.path.join("Cards", "{}.png".format(card)))
+	pics[card] = pygame.image.load\
+		(os.path.join("Cards", "{}.png".format(card))).convert()
 	pics[card] = pygame.transform.smoothscale(pics[card], (cW, cH))
 	pics["{}Rect".format(card)] = pics[card].get_rect(topleft = topLeft)
 	screen.blit(pics[card], pics["{}Rect".format(card)])
 
 def loadBG(screen, pics, cW, cH):
 	#loads images from file, resizes them, get_rects them
-	pics["bg"] = pygame.image.load("graphics.png")
+	pics["bg"] = pygame.image.load("graphics.png").convert()
 	pics["bgRect"] = pics["bg"].get_rect()
 	screen.blit(pics["bg"], pics["bgRect"])
 
@@ -318,9 +319,9 @@ def loadUI(screen):
 
 def loadPlayers(screen, table, pics, cW, cH, cPos):
 	for player in table.players:
-		drawText(screen, player.name, 20, BLACK,\
+		drawTextBox(screen, player.name, 20, BLACK,\
 		cPos[player.seat][0][0] + 5,\
-		cPos[player.seat][0][1] + 76)
+		cPos[player.seat][0][1] + 78, len(player.name) * 10, WHITE)
 		if(player.holeCards):
 			loadCard(screen, pics, player.holeCards[0],\
 				cW, cH, cPos[player.seat][0])
@@ -358,6 +359,17 @@ def drawText(screen, text, size, color, left, top):
 	tempFont = pygame.font.SysFont(None, size)
 	tempText = tempFont.render(text, False, color)
 	screen.blit(tempText, (left, top))
+
+def drawTextBox(screen, text, size, color, left, top, width, bgColor):
+	tempFont = pygame.font.SysFont(None, size)
+	tempText = tempFont.render(text, False, color)
+	bigBox = pygame.Surface((width + 2, size + 2))
+	bigBox.fill(BLACK)
+	box = pygame.Surface((width, size))
+	box.fill(bgColor)
+	screen.blit(bigBox, (left - 1, top - 1))
+	screen.blit(box, (left, top))
+	screen.blit(tempText, (left + 2, top + 2))
 
 def run(table):
 	#set graphics variables
@@ -421,16 +433,17 @@ def run(table):
 
 		# --- Game logic should go here
 		if(table.status == "river"):
-			#debug
+			# debug: card rigging
 			# p1.holeCards = ["Td", "3d"]
 			# p2.holeCards = ["9c", "Qc"]
 			# wsop.board = ["7d", "4s", "7c", "3h", "4h"]
 			# update(wsop)
 
+			# debug: card printing
 			print("Players: {}".format(wsop.players))
 			print("Board: {}".format(wsop.board))
-
 			print()
+			
 			winner = multiShowdown(wsop.players)
 			if(len(winner) == 1):
 				print("Winner: {} with {}".format(winner[0].name, winner[0].hand))
