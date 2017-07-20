@@ -9,15 +9,15 @@ import os
 import inputbox
 
 
-#maps card number to its value
+# maps card number to its value
 values = {'1':1, '2':2, '3':3, '4':4, '5':5, '6':6, '7':7, '8':8, '9':9,\
 	'T':10, 'J':11, 'Q':12, 'K':13, 'A':14}
 
-#maps card rank
+# maps card rank
 handRanks = {"high": 1, "pair":2, "twoPair":3, "trips":4, "straight":5,\
 	"flush":6, "fullHouse":7, "quads":8, "straightFlush": 9}
 
-#seats
+# seats
 seats = ("bm", "bl", "tl", "tm", "tr", "br")
 
 # Define some colors
@@ -29,13 +29,13 @@ BLUE     = (   0,   0, 255)
 GRAY	 = ( 220, 220, 220)
 
 def dealCard(table):
-	#pops a random card from the remaining deck.
+	# pops a random card from the remaining deck.
 	out = random.choice(table.deck)
 	table.deck.remove(out)
 	return out
 
 def dealTable(table):
-	#deals the cards for each stage and updates player cards pools
+	# deals the cards for each stage and updates player cards pools
 	if(table.status is "ante"):
 		for player in table.players:
 			player.holeCards.append(dealCard(table))
@@ -262,7 +262,7 @@ def multiShowdown(players):
 	return chops
 
 def showdown(p1, p2):
-	#returns winning player
+	#returns winning player, or None for tie
 	p1HandRank = handRanks[p1.hand[0]]
 	p2HandRank = handRanks[p2.hand[0]]
 	p1Hand = p1.hand[1]
@@ -309,15 +309,13 @@ def loadBG(screen, pics, cW, cH):
 def loadUI(screen):
 	#loads buttons and boxes
 	mouse = pygame.mouse.get_pos()
-	buttonFont = pygame.font.SysFont(None, 32)
-
 	if(680<mouse[0]<780 and 470<mouse[1]<510):
 		pygame.draw.rect(screen, BLACK, (678, 468, 104, 44))
 	pygame.draw.rect(screen, GRAY, (680, 470, 100, 40))
-	raiseText = buttonFont.render('Raise', False, BLACK)
-	screen.blit(raiseText, (700, 480))
+	drawText(screen, "Raise", 32, BLACK, 700, 480)
 
 def loadPlayers(screen, table, pics, cW, cH, cPos):
+	# draws hole cards
 	for player in table.players:
 		drawTextBox(screen, player.name, 20, BLACK,\
 		cPos[player.seat][0][0] + 5,\
@@ -329,6 +327,7 @@ def loadPlayers(screen, table, pics, cW, cH, cPos):
 				cW, cH, cPos[player.seat][1])
 
 def loadBoard(screen, table, pics, cW, cH, cPos):
+	# draws board cards and winner message
 	if(table.status == "flop"):
 		loadCard(screen, pics, table.board[0], cW, cH, cPos["flop1"])
 		loadCard(screen, pics, table.board[1], cW, cH, cPos["flop2"])
@@ -395,6 +394,7 @@ def run(table):
 		}
 	pics = {}
 
+	# inits
 	pygame.init()
 	pygame.font.init()
 	screen = pygame.display.set_mode(size)
@@ -443,7 +443,7 @@ def run(table):
 			print("Players: {}".format(wsop.players))
 			print("Board: {}".format(wsop.board))
 			print()
-			
+
 			winner = multiShowdown(wsop.players)
 			if(len(winner) == 1):
 				print("Winner: {} with {}".format(winner[0].name, winner[0].hand))
