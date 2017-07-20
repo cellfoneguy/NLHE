@@ -52,8 +52,6 @@ def dealTable(table):
 	elif(table.status is "turn"):
 		table.board.append(dealCard(table))
 		table.status = "river"
-	elif(table.status is "river"):
-		pass
 	update(table)
 
 def sortCards(pool):
@@ -68,7 +66,6 @@ def sortCards(pool):
 		out.append(big)
 		pool.remove(big)
 	return out
-
 
 def findFlush(pool):
 	#returns a list of the flush cards, or False if none
@@ -292,6 +289,34 @@ def update(table):
 		player.pool = sortCards(player.pool)
 		player.hand = evalHand(player.pool)
 
+def resolveTable(table):
+	# find winner, print winner, done table
+
+	# debug: card rigging
+	# p1.holeCards = ["Td", "3d"]
+	# p2.holeCards = ["9c", "Qc"]
+	# table.board = ["7d", "4s", "7c", "3h", "4h"]
+	# update(table)
+
+	# debug: card printing
+	print("Players: {}".format(table.players))
+	print("Board: {}".format(table.board))
+	print()
+
+	winner = multiShowdown(table.players)
+	if(len(winner) == 1):
+		print("Winner: {} with {}".format(winner[0].name, winner[0].hand))
+		table.winner = winner[0]
+	else:
+		print("Chop")
+	table.status = "done"
+
+def act(table, player):
+
+
+#################### DRAWING FUNCTIONS ####################
+
+
 def loadCard(screen, pics, card, cW, cH, topLeft):
 	#loads a card and places it
 	pics[card] = pygame.image.load\
@@ -370,6 +395,8 @@ def drawTextBox(screen, text, size, color, left, top, width, bgColor):
 	screen.blit(box, (left, top))
 	screen.blit(tempText, (left + 2, top + 2))
 
+
+
 def run(table):
 	#set graphics variables
 	screenW = 800
@@ -415,7 +442,7 @@ def run(table):
 			elif event.type == pygame.KEYDOWN:
 				key = event.key
 				if(key == pygame.K_ESCAPE):
-					wsop.reset()
+					table.reset()
 				elif(key == pygame.K_SPACE and len(table.players) >= 2):
 					dealTable(table)
 				elif(key == pygame.K_q):
@@ -432,28 +459,20 @@ def run(table):
 
 
 		# --- Game logic should go here
+
+		while(table.tableSet == False):
+			for player in table.actOrder:
+				act(table, player)
+
+			loadBG(screen, pics, cW, cH)
+			loadUI(screen)
+			loadPlayers(screen, table, pics, cW, cH, cPos)
+			loadBoard(screen, table, pics, cW, cH, cPos)
+			pygame.display.flip()
+			click.tick(60)
+
 		if(table.status == "river"):
-			# debug: card rigging
-			# p1.holeCards = ["Td", "3d"]
-			# p2.holeCards = ["9c", "Qc"]
-			# wsop.board = ["7d", "4s", "7c", "3h", "4h"]
-			# update(wsop)
-
-			# debug: card printing
-			print("Players: {}".format(wsop.players))
-			print("Board: {}".format(wsop.board))
-			print()
-
-			winner = multiShowdown(wsop.players)
-			if(len(winner) == 1):
-				print("Winner: {} with {}".format(winner[0].name, winner[0].hand))
-				table.winner = winner[0]
-			else:
-				print("Chop")
-			table.status = "done"
-
-		# Clear screen
-		#screen.fill(WHITE)
+			resolveTable(table)
 
 		# --- Drawing code should go here
 		loadBG(screen, pics, cW, cH)

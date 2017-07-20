@@ -37,6 +37,10 @@ class Table():
 		self.board = []
 		self.pot = 0
 		self.winner = None
+		self.actionOn = None
+		self.tableSet = False
+		self.actOrder = []
+		self.positions = {}
 
 	def reset(self):
 		self.deck = "As Ah Ad Ac 2s 2h 2d 2c 3s 3h 3d 3c 4s 4h 4d 4c "\
@@ -48,6 +52,8 @@ class Table():
 		self.winner = None
 		for player in self.players:
 			player.reset()
+		self.actionOn = None
+		self.tableSet = False
 
 	def addPlayer(self, name, seat):
 		p = Player()
