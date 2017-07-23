@@ -30,6 +30,10 @@ class Player():
 		self.holeCards = []
 		self.pool = []
 		self.hand = None
+		self.canFold = False
+		self.canRaise = False
+		self.canCall = False
+		self.canCheck = False
 
 
 
@@ -54,6 +58,7 @@ class Table():
 		self.raiseAmount = 0
 		self.dealer = None
 		self.first = None
+		self.lookup = threeWayDict()
 
 	def reset(self):
 		self.deck = "As Ah Ad Ac 2s 2h 2d 2c 3s 3h 3d 3c 4s 4h 4d 4c "\
@@ -72,37 +77,33 @@ class Table():
 		self.lastRaiser = None
 		self.action = "check"
 		self.raiseAmount = 0
-		self.dealer = self.findDealer()
+		self.dealer = None
 		self.first = None
+		self.lookup = threeWayDict()
 
-	def addPlayer(self, name, seat, pos):
-		p = Player()
-		p.name = name
-		p.seat = seat
-		p.position = pos
-		self.players.append(p)
+	def addPlayer(self, player):
+		self.players.append(player)
+		self.lookup.add(player, player.seat, player.position)
 
 	def setLastActor(self, player):
 		while(self.actOrder[0] is not player):
 			self.actOrder.append(self.actOrder.pop())
 		self.actOrder.append(self.actOrder.pop())
 
-	def findDealer(self):
-		for player in self.players:
-			if(player.position == "de"):
-				return player
-		return None
 
 class threeWayDict(dict):
-	def __setitem__(self, player, seat, pos):
+	# can use any key to lookup other two keys, returned as a dict
+	# not entirely useful with player as key, since player has info
+	def add(self, player, seat, pos):
 		if player in self:
 			del self[player]
 		if seat in self:
 			del self[seat]
 		if pos in self:
 			del self[pos]
-		dict.__setitem__(self, key, value)
-		dict.__setitem__(self, value, key)
+		dict.__setitem__(self, player, {"seat": seat, "position": pos})
+		dict.__setitem__(self, seat, {"player": player, "position": pos})
+		dict.__setitem__(self, pos, {"player": player, "seat": seat})
 
 	def __delitem__(self, key):
 		dict.__delitem__(self, self[key])
@@ -110,4 +111,4 @@ class threeWayDict(dict):
 
 	def __len__(self):
 		"""Returns the number of connections"""
-		return dict.__len__(self) // 2
+		return dict.__len__(self) // 3

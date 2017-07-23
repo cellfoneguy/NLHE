@@ -348,8 +348,37 @@ def act(table, player, screen, pics, cW, cH, cPos, clock):
 					quit()
 		loadEverything(screen, table, pics, cW, cH, cPos, clock)
 
-def getLeft(table, player):
+def findFirst(table):
+	if(len(table.players) == 2):
+		return table.lookup["sb"]["player"]
+	elif(len(table.players) == 3):
+		if(table.status == "pre"):
+			return table.lookup["de"]["player"]
+		else:
+			return table.lookup["sb"]["player"]
+	else:
+		if(table.status == "pre"):
+			return table.lookup["utg"]["player"]
+		else:
+			return table.lookup["sb"]["player"]
 
+def findActOrder(table):
+	first = findFirst(table)
+	out = []
+	numPlayers = len(table.players)
+	usedSeats = seats[:numPlayers]
+	firstIndex = usedSeats.index(first.seat)
+	for offset in range(numPlayers):
+		i = firstIndex + offset
+		if(i >= numPlayers):
+			i = i % numPlayers
+		out.append(table.lookup[usedSeats[i]]["player"])
+	return out
+
+def populateLookup(table):
+	table.lookup = classes.threeWayDict()
+	for player in table.players:
+		table.lookup.add(player, player.seat, player.position)
 
 #################### DRAWING FUNCTIONS ####################
 
@@ -481,6 +510,7 @@ def run(table):
 
 	# Loop until the user clicks the close button.
 	done = False
+	doneAdding = False
 
 	# Used to manage how fast the screen updates
 	clock = pygame.time.Clock()
@@ -494,17 +524,23 @@ def run(table):
 			elif event.type == pygame.KEYDOWN:
 				key = event.key
 				if(key == pygame.K_ESCAPE):
+					doneAdding = False
 					table.reset()
 				elif(key == pygame.K_SPACE and len(table.players) >= 2):
+					populateLookup(table)
+					doneAdding = True
 					dealTable(table)
 				elif(key == pygame.K_q):
 					done = True
 				elif(key == pygame.K_a and table.status == "ante" and\
 					len(table.players) < 6):
-					name = inputbox.ask(screen, "Player Name: ")
-					position = pos[len(table.players)]
-					table.addPlayer(name, seats[len(table.players)], position)
-					print(position)
+				# TODO: repopulation if add player after a round?
+					player = classes.Player()
+					player.name = inputbox.ask(screen, "Player Name: ")
+					player.position = pos[len(table.players)]
+					player.seat = seats[len(table.players)]
+					table.addPlayer(player)
+					print(player.position)
 			elif event.type == pygame.MOUSEBUTTONDOWN:
 				click = event.pos
 				if(680<click[0]<780 and 470<click[1]<510):
@@ -513,14 +549,11 @@ def run(table):
 
 
 		# --- Game logic should go here
-		# TODO: TEMPORARY GAME START WHEN TWO PLAYERS 
-		if(len(table.players) >= 2):
+		numPlayers = len(table.players)
+		if(doneAdding):
 			# TODO: TEMPORARY ACT ORDER FOR TWO PLAYERS ####
-			if(len(table.players) == 2):
-				table.findDealer().position = "bb"
-			if(table.status == "pre"):
-				table.first = 
-			table.actOrder = [table.players[0], table.players[1]]
+			# find act order
+			table.actOrder = findActOrder(table)
 			while(table.tableSet == False):
 				for player in table.actOrder:
 					print(player)
@@ -540,9 +573,9 @@ def run(table):
 
 				loadEverything(screen, table, pics, cW, cH, cPos, clock)
 			# table set
-			dealTable(table)
 			if(table.status != "river" and table.status != "done"):
 				# go again
+				dealTable(table)
 				table.tableSet = False
 
 		if(table.status == "river" and table.tableSet == True):
