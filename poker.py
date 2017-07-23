@@ -313,6 +313,7 @@ def resolveTable(table):
 		print("Winner: {} with {}".format(winner[0].name, winner[0].hand))
 		table.winner = winner[0]
 	else:
+		# TODO: game freezes on chop
 		print("Chop")
 	table.status = "done"
 
@@ -551,7 +552,6 @@ def run(table):
 		# --- Game logic should go here
 		numPlayers = len(table.players)
 		if(doneAdding):
-			# TODO: TEMPORARY ACT ORDER FOR TWO PLAYERS ####
 			# find act order
 			table.actOrder = findActOrder(table)
 			while(table.tableSet == False):
