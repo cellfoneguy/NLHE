@@ -22,6 +22,9 @@ handRanks = {"high": 1, "pair":2, "twoPair":3, "trips":4, "straight":5,\
 # seats
 seats = ("bm", "bl", "tl", "tm", "tr", "br")
 
+# positions
+pos = ("de", "sb", "bb", "utg", "mp", "co")
+
 # Define some colors
 BLACK    = (   0,   0,   0)
 WHITE    = ( 255, 255, 255)
@@ -341,8 +344,11 @@ def act(table, player, screen, pics, cW, cH, cPos, clock):
 				elif(key == pygame.K_c):
 					waiting = False
 					return False
+				elif(key == pygame.K_q):
+					quit()
 		loadEverything(screen, table, pics, cW, cH, cPos, clock)
 
+def getLeft(table, player):
 
 
 #################### DRAWING FUNCTIONS ####################
@@ -496,7 +502,9 @@ def run(table):
 				elif(key == pygame.K_a and table.status == "ante" and\
 					len(table.players) < 6):
 					name = inputbox.ask(screen, "Player Name: ")
-					table.addPlayer(name, seats[len(table.players)])
+					position = pos[len(table.players)]
+					table.addPlayer(name, seats[len(table.players)], position)
+					print(position)
 			elif event.type == pygame.MOUSEBUTTONDOWN:
 				click = event.pos
 				if(680<click[0]<780 and 470<click[1]<510):
@@ -508,6 +516,10 @@ def run(table):
 		# TODO: TEMPORARY GAME START WHEN TWO PLAYERS 
 		if(len(table.players) >= 2):
 			# TODO: TEMPORARY ACT ORDER FOR TWO PLAYERS ####
+			if(len(table.players) == 2):
+				table.findDealer().position = "bb"
+			if(table.status == "pre"):
+				table.first = 
 			table.actOrder = [table.players[0], table.players[1]]
 			while(table.tableSet == False):
 				for player in table.actOrder:
