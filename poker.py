@@ -7,6 +7,8 @@ import string
 import pygame
 import os
 import inputbox
+import time
+
 
 
 # maps card number to its value
@@ -424,7 +426,8 @@ def drawTextBox(screen, text, size, color, left, top, width, bgColor):
 	screen.blit(box, (left, top))
 	screen.blit(tempText, (left + 2, top + 2))
 
-def loadEverything(screen, table, pics, cW, cH, cPos, clock): # TODO: chip graphics
+def loadEverything(screen, table, pics, cW, cH, cPos, clock):
+	# TODO: chip graphics
 	# --- Drawing code should go here
 	loadBG(screen, pics, cW, cH)
 	loadUI(screen)
@@ -463,7 +466,9 @@ def run(table):
 	pics = {}
 
 	# inits
+	os.environ['SDL_VIDEO_WINDOW_POS'] = "%d,%d" % (10, 150)
 	pygame.init()
+	# time.sleep(1)
 	pygame.font.init()
 	screen = pygame.display.set_mode(size)
 	pygame.display.set_caption("Texas Hold'em")
