@@ -85,11 +85,6 @@ class Table():
 		self.players.append(player)
 		self.lookup.add(player, player.seat, player.position)
 
-	def setLastActor(self, player):
-		while(self.actOrder[0] is not player):
-			self.actOrder.append(self.actOrder.pop())
-		self.actOrder.append(self.actOrder.pop())
-
 
 class threeWayDict(dict):
 	# can use any key to lookup other two keys, returned as a dict

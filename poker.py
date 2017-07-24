@@ -336,7 +336,7 @@ def act(table, player, screen, pics, cW, cH, cPos, clock):
 				if(key == pygame.K_r):
 					table.action = "raise"
 					table.raiseAmount *= 2
-					table.setLastActor(player)
+					table.lastRaiser = player
 					waiting = False
 					return True
 				elif(key == pygame.K_f):
@@ -363,8 +363,7 @@ def findFirst(table):
 		else:
 			return table.lookup["sb"]["player"]
 
-def findActOrder(table):
-	first = findFirst(table)
+def findActOrder(table, first):
 	out = []
 	numPlayers = len(table.players)
 	usedSeats = seats[:numPlayers]
@@ -553,20 +552,24 @@ def run(table):
 		numPlayers = len(table.players)
 		if(doneAdding):
 			# find act order
-			table.actOrder = findActOrder(table)
+			first = findFirst(table)
+			table.actOrder = findActOrder(table, first)
 			while(table.tableSet == False):
 				for player in table.actOrder:
 					print(player)
-					if(player is table.actOrder[-1]):
+					if(table.action == "raise" and player is table.actOrder[-1]):
 						# looped back around to original raiser
 						table.tableSet = True
+						break
 					print(table.status)
 					if(act(table, player, screen, pics, cW, cH, cPos, clock)):
 						# player raised, restart for loop
+						table.action = "raise"
+						# hacky way to set act order starting with next player
+						table.actOrder = findActOrder(table, table.lastRaiser)
+						table.actOrder = findActOrder(table, table.actOrder[1])
 						break
-					else:
-						# no order change. keep going
-						continue
+
 				# no raises, checked around
 				if(table.action == "check"):
 					table.tableSet = True
@@ -576,6 +579,7 @@ def run(table):
 			if(table.status != "river" and table.status != "done"):
 				# go again
 				dealTable(table)
+				table.action = "check"
 				table.tableSet = False
 
 		if(table.status == "river" and table.tableSet == True):
