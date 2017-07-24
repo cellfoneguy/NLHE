@@ -25,7 +25,6 @@ class Player():
 		else:
 			return self.name
 		
-
 	def reset(self):
 		self.holeCards = []
 		self.pool = []
@@ -34,7 +33,6 @@ class Player():
 		self.canRaise = False
 		self.canCall = False
 		self.canCheck = False
-
 
 
 class Table():

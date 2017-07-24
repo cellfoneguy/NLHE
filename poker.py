@@ -60,7 +60,7 @@ def dealTable(table):
 	update(table)
 
 def sortCards(pool):
-	#sorts 7 cards by value, ignoring suit
+	# sorts 7 cards by value, ignoring suit
 	out = []
 	for i in range(len(pool)):
 		big = pool[0]
@@ -73,7 +73,7 @@ def sortCards(pool):
 	return out
 
 def findFlush(pool):
-	#returns a list of the flush cards, or False if none
+	# returns a list of the flush cards, or False if none
 	s, h, d, c = [], [], [], []
 	segregated = {"s":s, "h":h, "d":d, "c":c}
 	for card in pool:
@@ -86,16 +86,16 @@ def findFlush(pool):
 			d.append(card)
 		else:
 			c.append(card)
-	#only need to check once, because only one flush is possible
+	# only need to check once, because only one flush is possible
 	for key in segregated:
 		if(len(segregated[key]) >= 5):
 			return segregated[key]
 	return False
 
 def findStraight(pool):
-	#returns a list of the straight cards, or False if none
+	# returns a list of the straight cards, or False if none
 	poole = pool
-	#hacky way to implement Aces counting as 1 or 14
+	# hacky way to implement Aces counting as 1 or 14
 	if("As" in poole):
 		poole.append("1s")
 	elif("Ah" in poole):
@@ -108,7 +108,7 @@ def findStraight(pool):
 	out = []
 	current = values[poole[0][0]]
 	out.append(poole[0])
-	#list is sorted, so check consecutive indexes for consecutive values
+	# list is sorted, so check consecutive indexes for consecutive values
 	for card in poole:
 		value = values[card[0]]
 		if(value == current):
@@ -129,8 +129,8 @@ def findStraight(pool):
 		return False
 
 def findCounts(pool):
-	#finds the multiplicities of each card in the list
-	#returns as a dict {card letter: [card1, card2]}
+	# finds the multiplicities of each card in the list
+	# returns as a dict {card letter: [card1, card2]}
 	counts = {}
 	for card in pool:
 		if(card[0] in counts):
@@ -140,7 +140,7 @@ def findCounts(pool):
 	return counts
 
 def findQuads(pool, counts):
-	#finds quads or False
+	# finds quads or False
 	for key in counts:
 		if(len(counts[key]) == 4):
 			quads = [card for card in pool if card[0] == key]
@@ -149,8 +149,8 @@ def findQuads(pool, counts):
 	return False
 
 def findFullHouse(pool, counts):
-	#finds fullHouse or False
-	#assumes counts is sorted
+	# finds fullHouse or False
+	# assumes counts is sorted
 	triple = []
 	double = []
 	removed = []
@@ -168,7 +168,7 @@ def findFullHouse(pool, counts):
 	return False
 
 def findTrips(pool, counts):
-	#finds trips or False
+	# finds trips or False
 	for key in counts:
 		if(len(counts[key]) == 3):
 			trips = [card for card in pool if card[0] == key]
@@ -177,7 +177,7 @@ def findTrips(pool, counts):
 	return False
 
 def findTwoPair(pool, counts):
-	#finds twoPair or False
+	# finds twoPair or False
 	pairhi = []
 	pairlo = []
 	removed = []
@@ -198,7 +198,7 @@ def findTwoPair(pool, counts):
 	return False
 
 def findPair(pool, counts):
-	#finds pair or False
+	# finds pair or False
 	pair = []
 	for key in counts: 
 		if(len(counts[key]) == 2):
@@ -208,8 +208,8 @@ def findPair(pool, counts):
 	return False
 
 def evalHand(pool):
-	#finds all hands first. inefficient but prettier.
-	#separates finding different hands. also inefficient but prettier.
+	# finds all hands first. inefficient but prettier.
+	# separates finding different hands. also inefficient but prettier.
 	counts = findCounts(pool)
 	flush = findFlush(pool)
 	straightFlush = findStraight(flush) if flush else False
@@ -249,7 +249,8 @@ def evalHand(pool):
 		return ("high", pool[:5])
 
 def multiShowdown(players):
-	#can't handle 3-way chopped pots
+	# TODO: 3-way chops
+	# can't handle 3-way chopped pots
 	winner = players[0]
 	chops = []
 	for player in players[1:]:
@@ -264,7 +265,7 @@ def multiShowdown(players):
 	return chops
 
 def showdown(p1, p2):
-	#returns winning player, or None for tie
+	# returns winning player, or None for tie
 	p1HandRank = handRanks[p1.hand[0]]
 	p2HandRank = handRanks[p2.hand[0]]
 	p1Hand = p1.hand[1]
@@ -275,7 +276,7 @@ def showdown(p1, p2):
 	elif(p1HandRank < p2HandRank):
 		return p2
 	else:
-		#hand ranks are the same, compare values or kickers
+		# hand ranks are the same, compare values or kickers
 		for index in range(len(p1Hand)):
 			p1Card = p1Hand[index]
 			p2Card = p2Hand[index]
@@ -327,6 +328,7 @@ def eventOnButton(mouse, rect):
 	return False
 
 def act(table, player, screen, pics, cW, cH, cPos, bPos, clock):
+	# TODO: clean up act?
 	# waits for a player to act. returns True if raised (changes act order)
 	player.canRaise = True
 	player.canFold = True
@@ -435,7 +437,7 @@ def drawButton(screen, bColor, rect, bgColor, mouse, text, offset = (20, 10)):
 	pygame.draw.rect(screen, GRAY, rect)
 	drawText(screen, text, 32, BLACK, rect[0] + offset[0], rect[1] + offset[1])
 
-def loadUI(screen, bPos): # TODO: moar buttons
+def loadUI(screen, bPos): # TODO: even moar buttons
 	# loads buttons and boxes
 	mouse = pygame.mouse.get_pos()
 	drawButton(screen, GRAY, bPos["raise"], BLACK, mouse, "Raise")
@@ -561,6 +563,7 @@ def run(table):
 	clock = pygame.time.Clock()
 
 	# -------- Main Program Loop -----------
+	# TODO: clean up main loop
 	while not done:
 		# --- Main event loop
 		for event in pygame.event.get(): # User did something
@@ -594,6 +597,7 @@ def run(table):
 
 
 		# --- Game logic should go here
+		# TODO: clean up logic loop
 		numPlayers = len(table.players)
 		if(doneAdding):
 			# find act order
