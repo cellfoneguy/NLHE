@@ -317,9 +317,16 @@ def resolveTable(table):
 		print("Chop")
 	table.status = "done"
 
+def eventOnButton(mouse, rect):
+	left = rect[0]
+	right = rect[0] + rect[2]
+	top = rect[1]
+	bot = rect[1] + rect[3]
+	if(left<mouse[0]<right and top<mouse[1]<bot):
+		return True
+	return False
 
-
-def act(table, player, screen, pics, cW, cH, cPos, clock):
+def act(table, player, screen, pics, cW, cH, cPos, bPos, clock):
 	# waits for a player to act. returns True if raised (changes act order)
 	player.canRaise = True
 	player.canFold = True
@@ -347,7 +354,25 @@ def act(table, player, screen, pics, cW, cH, cPos, clock):
 					return False
 				elif(key == pygame.K_q):
 					quit()
-		loadEverything(screen, table, pics, cW, cH, cPos, clock)
+			elif(event.type == pygame.MOUSEBUTTONDOWN):
+				click = event.pos
+				if(eventOnButton(click, bPos["raise"])):
+					table.action = "raise"
+					table.raiseAmount *= 2
+					table.lastRaiser = player
+					waiting = False
+					return True
+				elif(eventOnButton(click, bPos["fold"])):
+					waiting = False
+					return False
+				elif(eventOnButton(click, bPos["check"])):
+					waiting = False
+					return False
+				elif(eventOnButton(click, bPos["call"])):
+					waiting = False
+					return False
+				print(event.pos)
+		loadEverything(screen, table, pics, cW, cH, cPos, bPos, clock)
 
 def findFirst(table):
 	if(len(table.players) == 2):
@@ -397,13 +422,27 @@ def loadBG(screen, pics, cW, cH):
 	pics["bgRect"] = pics["bg"].get_rect()
 	screen.blit(pics["bg"], pics["bgRect"])
 
-def loadUI(screen): # TODO: moar buttons
+def drawBorderIf(screen, color, rect, mouse):
+	left = rect[0]
+	right = rect[0] + rect[2]
+	top = rect[1]
+	bot = rect[1] + rect[3]
+	if(left<mouse[0]<right and top<mouse[1]<bot):
+		pygame.draw.rect(screen, color, (left-2, top-2, rect[2]+4, rect[3]+4))
+
+def drawButton(screen, bColor, rect, bgColor, mouse, text, offset = (20, 10)):
+	drawBorderIf(screen, BLACK, rect, mouse)
+	pygame.draw.rect(screen, GRAY, rect)
+	drawText(screen, text, 32, BLACK, rect[0] + offset[0], rect[1] + offset[1])
+
+def loadUI(screen, bPos): # TODO: moar buttons
 	# loads buttons and boxes
 	mouse = pygame.mouse.get_pos()
-	if(680<mouse[0]<780 and 470<mouse[1]<510):
-		pygame.draw.rect(screen, BLACK, (678, 468, 104, 44))
-	pygame.draw.rect(screen, GRAY, (680, 470, 100, 40))
-	drawText(screen, "Raise", 32, BLACK, 700, 480)
+	drawButton(screen, GRAY, bPos["raise"], BLACK, mouse, "Raise")
+	drawButton(screen, GRAY, bPos["call"], BLACK, mouse, "Call", (25, 10))
+	drawButton(screen, GRAY, bPos["check"], BLACK, mouse, "Check", (15, 10))
+	drawButton(screen, GRAY, bPos["fold"], BLACK, mouse, "Fold", (25, 10))
+
 
 def loadPlayers(screen, table, pics, cW, cH, cPos):
 	# draws hole cards
@@ -461,11 +500,11 @@ def drawTextBox(screen, text, size, color, left, top, width, bgColor):
 	screen.blit(box, (left, top))
 	screen.blit(tempText, (left + 2, top + 2))
 
-def loadEverything(screen, table, pics, cW, cH, cPos, clock):
+def loadEverything(screen, table, pics, cW, cH, cPos, bPos, clock):
 	# TODO: chip graphics
 	# --- Drawing code should go here
 	loadBG(screen, pics, cW, cH)
-	loadUI(screen)
+	loadUI(screen, bPos)
 	loadPlayers(screen, table, pics, cW, cH, cPos)
 	loadBoard(screen, table, pics, cW, cH, cPos)
 
@@ -498,6 +537,12 @@ def run(table):
 		"tr": ((580, 70), (636, 70)),\
 		"br": ((580, 300), (636, 300))\
 		}
+	bPos = {\
+		"raise": (680, 470, 100, 40),
+		"call": (560, 470, 100, 40),
+		"check": (440, 470, 100, 40),
+		"fold": (320, 470, 100, 40)
+	}
 	pics = {}
 
 	# inits
@@ -562,7 +607,7 @@ def run(table):
 						table.tableSet = True
 						break
 					print(table.status)
-					if(act(table, player, screen, pics, cW, cH, cPos, clock)):
+					if(act(table, player, screen, pics, cW, cH, cPos, bPos, clock)):
 						# player raised, restart for loop
 						table.action = "raise"
 						# hacky way to set act order starting with next player
@@ -574,7 +619,7 @@ def run(table):
 				if(table.action == "check"):
 					table.tableSet = True
 
-				loadEverything(screen, table, pics, cW, cH, cPos, clock)
+				loadEverything(screen, table, pics, cW, cH, cPos, bPos, clock)
 			# table set
 			if(table.status != "river" and table.status != "done"):
 				# go again
@@ -586,7 +631,7 @@ def run(table):
 			resolveTable(table)
 
 		# --- Drawing code should go here
-		loadEverything(screen, table, pics, cW, cH, cPos, clock)
+		loadEverything(screen, table, pics, cW, cH, cPos, bPos, clock)
 
 	pygame.quit()
 
