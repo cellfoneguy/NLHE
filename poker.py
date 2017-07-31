@@ -7,6 +7,7 @@ import string
 import pygame
 import os
 import inputbox
+# TODO: prettier inputbox
 import time
 
 
@@ -407,6 +408,7 @@ def populateLookup(table):
 	for player in table.players:
 		table.lookup.add(player, player.seat, player.position)
 
+
 #################### DRAWING FUNCTIONS ####################
 
 
@@ -433,6 +435,7 @@ def drawBorderIf(screen, color, rect, mouse):
 		pygame.draw.rect(screen, color, (left-2, top-2, rect[2]+4, rect[3]+4))
 
 def drawButton(screen, bColor, rect, bgColor, mouse, text, offset = (20, 10)):
+	# TODO: prettier text
 	drawBorderIf(screen, BLACK, rect, mouse)
 	pygame.draw.rect(screen, GRAY, rect)
 	drawText(screen, text, 32, BLACK, rect[0] + offset[0], rect[1] + offset[1])
@@ -445,13 +448,13 @@ def loadUI(screen, bPos): # TODO: even moar buttons
 	drawButton(screen, GRAY, bPos["check"], BLACK, mouse, "Check", (15, 10))
 	drawButton(screen, GRAY, bPos["fold"], BLACK, mouse, "Fold", (25, 10))
 
-
 def loadPlayers(screen, table, pics, cW, cH, cPos):
-	# draws hole cards
+	# draws hole cards, player name, player stack
 	for player in table.players:
-		drawTextBox(screen, player.name, 20, BLACK,\
+		text = "{}: {}".format(player.name, player.stack)
+		drawTextBox(screen, text, 20, BLACK,\
 		cPos[player.seat][0][0] + 5,\
-		cPos[player.seat][0][1] + 78, len(player.name) * 10, WHITE)
+		cPos[player.seat][0][1] + 78, len(text) * 8, WHITE)
 		if(player.holeCards):
 			drawCard(screen, pics, player.holeCards[0],\
 				cW, cH, cPos[player.seat][0])
@@ -459,7 +462,9 @@ def loadPlayers(screen, table, pics, cW, cH, cPos):
 				cW, cH, cPos[player.seat][1])
 
 def loadBoard(screen, table, pics, cW, cH, cPos):
-	# draws board cards and winner message
+	# draws board cards, pot, and winner message
+	text = "Pot: {}".format(table.curPot + table.prevPot)
+	drawTextBox(screen, text, 18, BLACK, 370, 165, len(text) * 8, WHITE)
 	if(table.status == "flop"):
 		drawCard(screen, pics, table.board[0], cW, cH, cPos["flop1"])
 		drawCard(screen, pics, table.board[1], cW, cH, cPos["flop2"])
@@ -487,11 +492,13 @@ def loadBoard(screen, table, pics, cW, cH, cPos):
 				cPos[table.winner.seat][0][1] - 27)
 
 def drawText(screen, text, size, color, left, top):
+	# draws text
 	tempFont = pygame.font.SysFont(None, size)
 	tempText = tempFont.render(text, False, color)
 	screen.blit(tempText, (left, top))
 
 def drawTextBox(screen, text, size, color, left, top, width, bgColor):
+	# draws text on a white box with black border
 	tempFont = pygame.font.SysFont(None, size)
 	tempText = tempFont.render(text, False, color)
 	bigBox = pygame.Surface((width + 2, size + 2))
@@ -546,6 +553,9 @@ def run(table):
 		"fold": (320, 470, 100, 40)
 	}
 	pics = {}
+	ante = 1
+	sb = 2
+	bb = 5
 
 	# inits
 	os.environ['SDL_VIDEO_WINDOW_POS'] = "%d,%d" % (10, 150)
@@ -570,18 +580,26 @@ def run(table):
 			if event.type == pygame.QUIT:
 				done = True
 			elif event.type == pygame.KEYDOWN:
+				# button press
 				key = event.key
 				if(key == pygame.K_ESCAPE):
+					# New hand
 					doneAdding = False
 					table.reset()
 				elif(key == pygame.K_SPACE and len(table.players) >= 2):
+					# start hand
 					populateLookup(table)
+					for player in table.players:
+						player.bet(ante)
+					table.calcPot()
 					doneAdding = True
 					dealTable(table)
 				elif(key == pygame.K_q):
+					# quit
 					done = True
 				elif(key == pygame.K_a and table.status == "ante" and\
 					len(table.players) < 6):
+					# Add new player
 				# TODO: repopulation if add player after a round?
 					player = classes.Player()
 					player.name = inputbox.ask(screen, "Player Name: ")
@@ -590,19 +608,18 @@ def run(table):
 					table.addPlayer(player)
 					print(player.position)
 			elif event.type == pygame.MOUSEBUTTONDOWN:
-				click = event.pos
-				if(680<click[0]<780 and 470<click[1]<510):
-					dealTable(table)
+				pass
+				# mouse click
 				print(event.pos)
 
 
 		# --- Game logic should go here
-		# TODO: clean up logic loop
 		numPlayers = len(table.players)
 		if(doneAdding):
 			# find act order
 			first = findFirst(table)
 			table.actOrder = findActOrder(table, first)
+
 			while(table.tableSet == False):
 				for player in table.actOrder:
 					print(player)
@@ -634,7 +651,6 @@ def run(table):
 		if(table.status == "river" and table.tableSet == True):
 			resolveTable(table)
 
-		# --- Drawing code should go here
 		loadEverything(screen, table, pics, cW, cH, cPos, bPos, clock)
 
 	pygame.quit()

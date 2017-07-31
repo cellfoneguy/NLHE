@@ -9,7 +9,7 @@ class Player():
 		self.name = ""
 		self.position = ""
 		self.seat = ""
-		self.stack = 100
+		self.stack = 1000
 		self.holeCards = []
 		self.pool = []
 		self.hand = None
@@ -17,6 +17,7 @@ class Player():
 		self.canRaise = False
 		self.canCall = False
 		self.canCheck = False
+		self.curBet = 0
 
 	def __repr__(self):
 		if(self.holeCards):
@@ -33,7 +34,11 @@ class Player():
 		self.canRaise = False
 		self.canCall = False
 		self.canCheck = False
+		self.curBet = 0
 
+	def bet(self, amount):
+		self.curBet = amount
+		self.stack -= amount
 
 class Table():
 	#holds general table information
@@ -45,7 +50,8 @@ class Table():
 			"Ts Th Td Tc Js Jh Jd Jc Qs Qh Qd Qc Ks Kh Kd Kc".split(" ")
 		self.status = "ante"
 		self.board = []
-		self.pot = 0
+		self.curPot = 0
+		self.prevPot = 0
 		self.winner = None
 		self.actionOn = None
 		self.tableSet = False
@@ -64,7 +70,8 @@ class Table():
 			"Ts Th Td Tc Js Jh Jd Jc Qs Qh Qd Qc Ks Kh Kd Kc".split(" ")
 		self.status = "ante"
 		self.board = []
-		self.pot = 0
+		self.curPot = 0
+		self.prevPot = 0
 		self.winner = None
 		for player in self.players:
 			player.reset()
@@ -82,6 +89,10 @@ class Table():
 	def addPlayer(self, player):
 		self.players.append(player)
 		self.lookup.add(player, player.seat, player.position)
+
+	def calcPot(self):
+		for player in self.players:
+			self.curPot += player.curBet
 
 
 class threeWayDict(dict):
