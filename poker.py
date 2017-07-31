@@ -332,6 +332,7 @@ def act(table, player, screen, pics, cW, cH, cPos, bPos, clock):
 	# TODO: clean up act?
 	# waits for a player to act. returns True if raised (changes act order)
 	player.canRaise = True
+	minRaise = table.blinds["bb"] if table.action == "check" else table.raiseAmount
 	player.canFold = True
 	if(table.action == "check"):
 		player.canCheck = True
@@ -345,14 +346,21 @@ def act(table, player, screen, pics, cW, cH, cPos, bPos, clock):
 				key = event.key
 				if(key == pygame.K_r):
 					table.action = "raise"
-					table.raiseAmount *= 2
 					table.lastRaiser = player
+					# TODO: custom bet amounts
+					player.bet(table.betAmount + minRaise)
+					print("Player {} raised by {} to {}".format(player.name, minRaise, table.betAmount))
+					table.betAmount += minRaise
+					table.raiseAmount = minRaise
+					player.curBet = table.betAmount
 					waiting = False
 					return True
 				elif(key == pygame.K_f):
 					waiting = False
 					return False
 				elif(key == pygame.K_c):
+					player.bet(table.betAmount)
+					player.curBet = table.betAmount
 					waiting = False
 					return False
 				elif(key == pygame.K_q):
@@ -361,8 +369,9 @@ def act(table, player, screen, pics, cW, cH, cPos, bPos, clock):
 				click = event.pos
 				if(eventOnButton(click, bPos["raise"])):
 					table.action = "raise"
-					table.raiseAmount *= 2
 					table.lastRaiser = player
+					player.bet(table.betAmount + table.raiseAmount)
+					table.betAmount += table.raiseAmount
 					waiting = False
 					return True
 				elif(eventOnButton(click, bPos["fold"])):
@@ -372,6 +381,7 @@ def act(table, player, screen, pics, cW, cH, cPos, bPos, clock):
 					waiting = False
 					return False
 				elif(eventOnButton(click, bPos["call"])):
+					player.bet(table.betAmount)
 					waiting = False
 					return False
 				print(event.pos)
@@ -453,8 +463,11 @@ def loadPlayers(screen, table, pics, cW, cH, cPos):
 	for player in table.players:
 		text = "{}: {}".format(player.name, player.stack)
 		drawTextBox(screen, text, 20, BLACK,\
-		cPos[player.seat][0][0] + 5,\
-		cPos[player.seat][0][1] + 78, len(text) * 8, WHITE)
+			cPos[player.seat][0][0] + 5,\
+			cPos[player.seat][0][1] + 78, len(text) * 8, WHITE)
+		drawTextBox(screen, str(player.curBet), 20, BLACK, \
+			cPos[player.seat][0][0] + 5,\
+			cPos[player.seat][0][1] - 15, len(str(player.curBet)) * 10, WHITE)
 		if(player.holeCards):
 			drawCard(screen, pics, player.holeCards[0],\
 				cW, cH, cPos[player.seat][0])
@@ -553,9 +566,6 @@ def run(table):
 		"fold": (320, 470, 100, 40)
 	}
 	pics = {}
-	ante = 1
-	sb = 2
-	bb = 5
 
 	# inits
 	os.environ['SDL_VIDEO_WINDOW_POS'] = "%d,%d" % (10, 150)
@@ -590,7 +600,13 @@ def run(table):
 					# start hand
 					populateLookup(table)
 					for player in table.players:
-						player.bet(ante)
+						if(player.position == "sb"):
+							player.bet(table.blinds["sb"])
+						elif(player.position == "bb"):
+							player.bet(table.blinds["bb"])
+						else:
+							player.bet(table.blinds["ante"])
+					table.betAmount = table.blinds["bb"]
 					table.calcPot()
 					doneAdding = True
 					dealTable(table)
@@ -606,7 +622,7 @@ def run(table):
 					player.position = pos[len(table.players)]
 					player.seat = seats[len(table.players)]
 					table.addPlayer(player)
-					print(player.position)
+					#print(player.position)
 			elif event.type == pygame.MOUSEBUTTONDOWN:
 				pass
 				# mouse click
@@ -622,12 +638,12 @@ def run(table):
 
 			while(table.tableSet == False):
 				for player in table.actOrder:
-					print(player)
+					#print(player)
 					if(table.action == "raise" and player is table.actOrder[-1]):
 						# looped back around to original raiser
 						table.tableSet = True
 						break
-					print(table.status)
+					#print(table.status)
 					if(act(table, player, screen, pics, cW, cH, cPos, bPos, clock)):
 						# player raised, restart for loop
 						table.action = "raise"

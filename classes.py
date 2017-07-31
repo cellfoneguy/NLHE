@@ -37,8 +37,9 @@ class Player():
 		self.curBet = 0
 
 	def bet(self, amount):
+		self.stack = self.stack - (amount - self.curBet)
 		self.curBet = amount
-		self.stack -= amount
+
 
 class Table():
 	#holds general table information
@@ -49,6 +50,7 @@ class Table():
 			"5s 5h 5d 5c 6s 6h 6d 6c 7s 7h 7d 7c 8s 8h 8d 8c 9s 9h 9d 9c "\
 			"Ts Th Td Tc Js Jh Jd Jc Qs Qh Qd Qc Ks Kh Kd Kc".split(" ")
 		self.status = "ante"
+		self.blinds = {"ante": 1, "sb": 2, "bb": 5}
 		self.board = []
 		self.curPot = 0
 		self.prevPot = 0
@@ -59,6 +61,7 @@ class Table():
 		self.positions = {}
 		self.lastRaiser = None
 		self.action = "check"
+		self.betAmount = 0
 		self.raiseAmount = 0
 		self.dealer = None
 		self.first = None
@@ -81,6 +84,7 @@ class Table():
 		self.positions = {}
 		self.lastRaiser = None
 		self.action = "check"
+		self.betAmount = 0
 		self.raiseAmount = 0
 		self.dealer = None
 		self.first = None
