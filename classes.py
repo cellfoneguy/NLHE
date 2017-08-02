@@ -18,6 +18,7 @@ class Player():
 		self.canCall = False
 		self.canCheck = False
 		self.curBet = 0
+		self.turn = False
 
 	def __repr__(self):
 		if(self.holeCards):
@@ -35,6 +36,7 @@ class Player():
 		self.canCall = False
 		self.canCheck = False
 		self.curBet = 0
+		self.turn = False
 
 	def bet(self, amount):
 		self.stack = self.stack - (amount - self.curBet)

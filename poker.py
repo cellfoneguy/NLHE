@@ -461,13 +461,27 @@ def loadUI(screen, bPos): # TODO: even moar buttons
 def loadPlayers(screen, table, pics, cW, cH, cPos):
 	# draws hole cards, player name, player stack
 	for player in table.players:
-		text = "{}: {}".format(player.name, player.stack)
-		drawTextBox(screen, text, 20, BLACK,\
+		if(player.seat[0] == "b"):
+			yStack = 80
+			yBet = -20
+		else:
+			yStack = -20
+			yBet = 80
+		stack = "{}: {}".format(player.name, player.stack)
+		drawTextBox(screen, stack, 20, BLACK,\
 			cPos[player.seat][0][0] + 5,\
-			cPos[player.seat][0][1] + 78, len(text) * 8, WHITE)
+			cPos[player.seat][0][1] + yStack, len(stack) * 8, WHITE)
 		drawTextBox(screen, str(player.curBet), 20, BLACK, \
 			cPos[player.seat][0][0] + 5,\
-			cPos[player.seat][0][1] - 15, len(str(player.curBet)) * 10, WHITE)
+			cPos[player.seat][0][1] + yBet, len(str(player.curBet)) * 10, WHITE)
+		if(player.turn):
+			bgBox = pygame.Surface((cW*2 + 4, cH + 4))
+			bgBox.fill((255, 255, 0)) 
+			screen.blit(bgBox, (cPos[player.seat][0][0] - 2, cPos[player.seat][0][1] - 2))
+		elif(player == table.winner):
+			bgBox = pygame.Surface((cW*2 + 4, cH + 4))
+			bgBox.fill(GREEN) 
+			screen.blit(bgBox, (cPos[player.seat][0][0] - 2, cPos[player.seat][0][1] - 2))
 		if(player.holeCards):
 			drawCard(screen, pics, player.holeCards[0],\
 				cW, cH, cPos[player.seat][0])
@@ -476,8 +490,8 @@ def loadPlayers(screen, table, pics, cW, cH, cPos):
 
 def loadBoard(screen, table, pics, cW, cH, cPos):
 	# draws board cards, pot, and winner message
-	text = "Pot: {}".format(table.curPot + table.prevPot)
-	drawTextBox(screen, text, 18, BLACK, 370, 165, len(text) * 8, WHITE)
+	pot = "Pot: {}".format(table.curPot + table.prevPot)
+	drawTextBox(screen, pot, 18, BLACK, 370, 175, len(pot) * 8, WHITE)
 	if(table.status == "flop"):
 		drawCard(screen, pics, table.board[0], cW, cH, cPos["flop1"])
 		drawCard(screen, pics, table.board[1], cW, cH, cPos["flop2"])
@@ -544,7 +558,7 @@ def run(table):
 	dividerH = 450
 	cW = 56
 	cH = 76
-	bTop = dividerH/2 - cH/2
+	bTop = dividerH/2 - cH/2 + 10
 	bf1 = (250, bTop)
 	bf2 = (310, bTop)
 	bf3 = (370, bTop)
@@ -552,10 +566,10 @@ def run(table):
 	br = (490, bTop)
 	size = (screenW, screenH)
 	cPos = {"flop1": bf1, "flop2": bf2, "flop3": bf3, "turn": bt, "river": br,\
-		"bm": (((screenW/2 - cW), 350), ((screenW/2), 350)),\
+		"bm": (((screenW/2 - cW), 345), ((screenW/2), 345)),\
 		"bl": ((100, 300), (156, 300)),\
 		"tl": ((100, 70), (156, 70)),\
-		"tm": (((screenW/2 - cW), 30), ((screenW/2), 30)),\
+		"tm": (((screenW/2 - cW), 25), ((screenW/2), 25)),\
 		"tr": ((580, 70), (636, 70)),\
 		"br": ((580, 300), (636, 300))\
 		}
@@ -638,6 +652,7 @@ def run(table):
 
 			while(table.tableSet == False):
 				for player in table.actOrder:
+					player.turn = True
 					#print(player)
 					if(table.action == "raise" and player is table.actOrder[-1]):
 						# looped back around to original raiser
@@ -651,6 +666,7 @@ def run(table):
 						table.actOrder = findActOrder(table, table.lastRaiser)
 						table.actOrder = findActOrder(table, table.actOrder[1])
 						break
+					player.turn = False
 
 				# no raises, checked around
 				if(table.action == "check"):
