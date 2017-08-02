@@ -10,7 +10,9 @@ import inputbox
 # TODO: prettier inputbox
 import time
 
-
+# TODO: raising leaves turn indicator
+# TODO: weird pot totals
+# TODO: raise by 5 to 0 postflop?
 
 # maps card number to its value
 values = {'1':1, '2':2, '3':3, '4':4, '5':5, '6':6, '7':7, '8':8, '9':9,\
@@ -42,6 +44,7 @@ def dealCard(table):
 
 def dealTable(table):
 	# deals the cards for each stage and updates player cards pools
+	table.prevPot = table.curPot
 	if(table.status is "ante"):
 		for player in table.players:
 			player.holeCards.append(dealCard(table))
@@ -353,14 +356,17 @@ def act(table, player, screen, pics, cW, cH, cPos, bPos, clock):
 					table.betAmount += minRaise
 					table.raiseAmount = minRaise
 					player.curBet = table.betAmount
+					table.calcPot()
 					waiting = False
 					return True
 				elif(key == pygame.K_f):
+					table.inHand.remove(player)
 					waiting = False
 					return False
 				elif(key == pygame.K_c):
 					player.bet(table.betAmount)
 					player.curBet = table.betAmount
+					table.calcPot()
 					waiting = False
 					return False
 				elif(key == pygame.K_q):
@@ -370,11 +376,16 @@ def act(table, player, screen, pics, cW, cH, cPos, bPos, clock):
 				if(eventOnButton(click, bPos["raise"])):
 					table.action = "raise"
 					table.lastRaiser = player
-					player.bet(table.betAmount + table.raiseAmount)
-					table.betAmount += table.raiseAmount
+					player.bet(table.betAmount + minRaise)
+					print("Player {} raised by {} to {}".format(player.name, minRaise, table.betAmount))
+					table.betAmount += minRaise
+					table.raiseAmount = minRaise
+					player.curBet = table.betAmount
+					table.calcPot()
 					waiting = False
 					return True
 				elif(eventOnButton(click, bPos["fold"])):
+					table.inHand.remove(player)
 					waiting = False
 					return False
 				elif(eventOnButton(click, bPos["check"])):
@@ -382,6 +393,8 @@ def act(table, player, screen, pics, cW, cH, cPos, bPos, clock):
 					return False
 				elif(eventOnButton(click, bPos["call"])):
 					player.bet(table.betAmount)
+					player.curBet = table.betAmount
+					table.calcPot()
 					waiting = False
 					return False
 				print(event.pos)
@@ -422,13 +435,16 @@ def populateLookup(table):
 #################### DRAWING FUNCTIONS ####################
 
 
-def drawCard(screen, pics, card, cW, cH, topLeft):
+def drawCard(screen, pics, card, cW, cH, topLeft, transparent = False):
 	#loads a card and places it
 	pics[card] = pygame.image.load\
 		(os.path.join("Cards", "{}.png".format(card))).convert()
 	pics[card] = pygame.transform.smoothscale(pics[card], (cW, cH))
-	pics["{}Rect".format(card)] = pics[card].get_rect(topleft = topLeft)
-	screen.blit(pics[card], pics["{}Rect".format(card)])
+	cardRect = "{}Rect".format(card)
+	if(transparent):
+		pics[card].set_alpha(100)
+	pics[cardRect] = pics[card].get_rect(topleft = topLeft)
+	screen.blit(pics[card], pics[cardRect])
 
 def loadBG(screen, pics, cW, cH):
 	#loads images from file, resizes them, get_rects them
@@ -474,7 +490,7 @@ def loadPlayers(screen, table, pics, cW, cH, cPos):
 		drawTextBox(screen, str(player.curBet), 20, BLACK, \
 			cPos[player.seat][0][0] + 5,\
 			cPos[player.seat][0][1] + yBet, len(str(player.curBet)) * 10, WHITE)
-		if(player.turn):
+		if(player.turn and not table.winner):
 			bgBox = pygame.Surface((cW*2 + 4, cH + 4))
 			bgBox.fill((255, 255, 0)) 
 			screen.blit(bgBox, (cPos[player.seat][0][0] - 2, cPos[player.seat][0][1] - 2))
@@ -483,30 +499,49 @@ def loadPlayers(screen, table, pics, cW, cH, cPos):
 			bgBox.fill(GREEN) 
 			screen.blit(bgBox, (cPos[player.seat][0][0] - 2, cPos[player.seat][0][1] - 2))
 		if(player.holeCards):
+			transparent = True
+			if(player in table.inHand):
+				transparent = False
 			drawCard(screen, pics, player.holeCards[0],\
-				cW, cH, cPos[player.seat][0])
+				cW, cH, cPos[player.seat][0], transparent)
 			drawCard(screen, pics, player.holeCards[1],\
-				cW, cH, cPos[player.seat][1])
+				cW, cH, cPos[player.seat][1], transparent)
 
 def loadBoard(screen, table, pics, cW, cH, cPos):
 	# draws board cards, pot, and winner message
-	pot = "Pot: {}".format(table.curPot + table.prevPot)
+	pot = "Pot: {}".format(table.curPot)
+	if(table.winner):
+			drawText(screen, "Winner", 40, BLACK,\
+				cPos[table.winner.seat][0][0] + 5,\
+				cPos[table.winner.seat][0][1] - 27)
 	drawTextBox(screen, pot, 18, BLACK, 370, 175, len(pot) * 8, WHITE)
 	if(table.status == "flop"):
 		drawCard(screen, pics, table.board[0], cW, cH, cPos["flop1"])
 		drawCard(screen, pics, table.board[1], cW, cH, cPos["flop2"])
 		drawCard(screen, pics, table.board[2], cW, cH, cPos["flop3"])
+		if(table.winner):
+			drawText(screen, "Winner", 40, BLACK,\
+				cPos[table.winner.seat][0][0] + 5,\
+				cPos[table.winner.seat][0][1] - 27)
 	elif(table.status == "turn"):
 		drawCard(screen, pics, table.board[0], cW, cH, cPos["flop1"])
 		drawCard(screen, pics, table.board[1], cW, cH, cPos["flop2"])
 		drawCard(screen, pics, table.board[2], cW, cH, cPos["flop3"])
 		drawCard(screen, pics, table.board[3], cW, cH, cPos["turn"])
+		if(table.winner):
+			drawText(screen, "Winner", 40, BLACK,\
+				cPos[table.winner.seat][0][0] + 5,\
+				cPos[table.winner.seat][0][1] - 27)
 	elif(table.status == "river"):
 		drawCard(screen, pics, table.board[0], cW, cH, cPos["flop1"])
 		drawCard(screen, pics, table.board[1], cW, cH, cPos["flop2"])
 		drawCard(screen, pics, table.board[2], cW, cH, cPos["flop3"])
 		drawCard(screen, pics, table.board[3], cW, cH, cPos["turn"])
 		drawCard(screen, pics, table.board[4], cW, cH, cPos["river"])
+		if(table.winner):
+			drawText(screen, "Winner", 40, BLACK,\
+				cPos[table.winner.seat][0][0] + 5,\
+				cPos[table.winner.seat][0][1] - 27)
 	elif(table.status == "done"):
 		drawCard(screen, pics, table.board[0], cW, cH, cPos["flop1"])
 		drawCard(screen, pics, table.board[1], cW, cH, cPos["flop2"])
@@ -620,6 +655,7 @@ def run(table):
 							player.bet(table.blinds["bb"])
 						else:
 							player.bet(table.blinds["ante"])
+						print(player.curBet)
 					table.betAmount = table.blinds["bb"]
 					table.calcPot()
 					doneAdding = True
@@ -651,20 +687,28 @@ def run(table):
 			table.actOrder = findActOrder(table, first)
 
 			while(table.tableSet == False):
+				if(table.winner):
+					break
 				for player in table.actOrder:
-					player.turn = True
+					if(player not in table.inHand):
+						continue
 					#print(player)
 					if(table.action == "raise" and player is table.actOrder[-1]):
 						# looped back around to original raiser
 						table.tableSet = True
 						break
 					#print(table.status)
+					player.turn = True
 					if(act(table, player, screen, pics, cW, cH, cPos, bPos, clock)):
 						# player raised, restart for loop
 						table.action = "raise"
 						# hacky way to set act order starting with next player
 						table.actOrder = findActOrder(table, table.lastRaiser)
 						table.actOrder = findActOrder(table, table.actOrder[1])
+						break
+					# possibly folded to one player left
+					if(len(table.inHand) == 1):
+						table.winner = table.inHand[0]
 						break
 					player.turn = False
 
@@ -674,13 +718,17 @@ def run(table):
 
 				loadEverything(screen, table, pics, cW, cH, cPos, bPos, clock)
 			# table set
-			if(table.status != "river" and table.status != "done"):
+			if(table.status != "river" and table.status != "done" and not table.winner):
 				# go again
+				for player in table.players:
+					player.curBet = 0
+				table.betAmount = 0
+				table.raiseAmount = 0
 				dealTable(table)
 				table.action = "check"
 				table.tableSet = False
 
-		if(table.status == "river" and table.tableSet == True):
+		if(table.status == "river" and table.tableSet == True and not table.winner):
 			resolveTable(table)
 
 		loadEverything(screen, table, pics, cW, cH, cPos, bPos, clock)

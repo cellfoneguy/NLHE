@@ -48,6 +48,7 @@ class Table():
 
 	def __init__(self):
 		self.players = []
+		self.inHand = []
 		self.deck = "As Ah Ad Ac 2s 2h 2d 2c 3s 3h 3d 3c 4s 4h 4d 4c "\
 			"5s 5h 5d 5c 6s 6h 6d 6c 7s 7h 7d 7c 8s 8h 8d 8c 9s 9h 9d 9c "\
 			"Ts Th Td Tc Js Jh Jd Jc Qs Qh Qd Qc Ks Kh Kd Kc".split(" ")
@@ -80,6 +81,9 @@ class Table():
 		self.winner = None
 		for player in self.players:
 			player.reset()
+		self.inHand = []
+		for player in self.players:
+			self.inHand.append(player)
 		self.actionOn = None
 		self.tableSet = False
 		self.actOrder = []
@@ -94,9 +98,11 @@ class Table():
 
 	def addPlayer(self, player):
 		self.players.append(player)
+		self.inHand.append(player)
 		self.lookup.add(player, player.seat, player.position)
 
 	def calcPot(self):
+		self.curPot = self.prevPot
 		for player in self.players:
 			self.curPot += player.curBet
 
