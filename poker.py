@@ -352,7 +352,8 @@ def act(table, player, screen, pics, cW, cH, cPos, bPos, clock):
 					table.lastRaiser = player
 					# TODO: custom bet amounts
 					player.bet(table.betAmount + minRaise)
-					print("Player {} raised by {} to {}".format(player.name, minRaise, table.betAmount))
+					print("Player {} raised by {} to {}".format(\
+						player.name, minRaise, table.betAmount))
 					table.betAmount += minRaise
 					table.raiseAmount = minRaise
 					player.curBet = table.betAmount
@@ -377,7 +378,8 @@ def act(table, player, screen, pics, cW, cH, cPos, bPos, clock):
 					table.action = "raise"
 					table.lastRaiser = player
 					player.bet(table.betAmount + minRaise)
-					print("Player {} raised by {} to {}".format(player.name, minRaise, table.betAmount))
+					print("Player {} raised by {} to {}".format(\
+						player.name, minRaise, table.betAmount))
 					table.betAmount += minRaise
 					table.raiseAmount = minRaise
 					player.curBet = table.betAmount
@@ -430,6 +432,7 @@ def populateLookup(table):
 	table.lookup = classes.threeWayDict()
 	for player in table.players:
 		table.lookup.add(player, player.seat, player.position)
+
 
 
 #################### DRAWING FUNCTIONS ####################
@@ -705,10 +708,12 @@ def run(table):
 						# hacky way to set act order starting with next player
 						table.actOrder = findActOrder(table, table.lastRaiser)
 						table.actOrder = findActOrder(table, table.actOrder[1])
+						player.turn = False
 						break
 					# possibly folded to one player left
 					if(len(table.inHand) == 1):
 						table.winner = table.inHand[0]
+						player.turn = False
 						break
 					player.turn = False
 
