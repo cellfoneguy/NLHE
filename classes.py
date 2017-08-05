@@ -102,8 +102,11 @@ class Table():
 		self.lookup.add(player, player.seat, player.position)
 
 	def calcPot(self):
+		print()
 		self.curPot = self.prevPot
+		print(self.prevPot)
 		for player in self.players:
+			print(player.curBet)
 			self.curPot += player.curBet
 
 

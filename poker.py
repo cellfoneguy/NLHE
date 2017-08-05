@@ -10,8 +10,6 @@ import inputbox
 # TODO: prettier inputbox
 import time
 
-# TODO: raising leaves turn indicator
-# TODO: weird pot totals
 # TODO: raise by 5 to 0 postflop?
 
 # maps card number to its value
@@ -44,7 +42,6 @@ def dealCard(table):
 
 def dealTable(table):
 	# deals the cards for each stage and updates player cards pools
-	table.prevPot = table.curPot
 	if(table.status is "ante"):
 		for player in table.players:
 			player.holeCards.append(dealCard(table))
@@ -356,7 +353,6 @@ def act(table, player, screen, pics, cW, cH, cPos, bPos, clock):
 						player.name, minRaise, table.betAmount))
 					table.betAmount += minRaise
 					table.raiseAmount = minRaise
-					player.curBet = table.betAmount
 					table.calcPot()
 					waiting = False
 					return True
@@ -366,7 +362,6 @@ def act(table, player, screen, pics, cW, cH, cPos, bPos, clock):
 					return False
 				elif(key == pygame.K_c):
 					player.bet(table.betAmount)
-					player.curBet = table.betAmount
 					table.calcPot()
 					waiting = False
 					return False
@@ -395,7 +390,6 @@ def act(table, player, screen, pics, cW, cH, cPos, bPos, clock):
 					return False
 				elif(eventOnButton(click, bPos["call"])):
 					player.bet(table.betAmount)
-					player.curBet = table.betAmount
 					table.calcPot()
 					waiting = False
 					return False
@@ -729,6 +723,7 @@ def run(table):
 					player.curBet = 0
 				table.betAmount = 0
 				table.raiseAmount = 0
+				table.prevPot = table.curPot
 				dealTable(table)
 				table.action = "check"
 				table.tableSet = False
