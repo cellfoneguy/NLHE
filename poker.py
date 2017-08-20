@@ -1,6 +1,6 @@
 # Alex Bai
 # Texas Hold'Em
-# foo
+# fooo
 
 import random
 import classes
